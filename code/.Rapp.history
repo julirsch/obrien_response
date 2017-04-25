@@ -1,0 +1,4730 @@
+install.packages("pwr")
+library(pwr)
+pwr.f2.test
+pwr.t.test(n=100,d=1.5,sig.level=0.05/20000)
+pwr.t.test(n=100,d=1.2,sig.level=0.05/20000)
+pwr.t.test(n=100,d=1.1,sig.level=0.05/20000)
+pwr.t.test(n=100,d=0.5,sig.level=0.05/20000)
+pwr.t.test(n=100,d=0.2,sig.level=0.05/20000)
+pwr.t.test(n=100,d=0.1,sig.level=0.05/20000)
+pwr.t.test(n=100,d=0.05,sig.level=0.05/20000)
+pwr.t.test(n=100,d=1,sig.level=0.05/20000)
+pwr.t.test(n=100,d=0,sig.level=0.05/20000)
+pwr.t.test(n=100,d=-1,sig.level=0.05/20000)
+pwr.t.test(n=100,d=0.2,sig.level=0.05/20000)
+pwr.t.test(n=100,d=0.2,sig.level=0.05)
+pwr.t.test(n=100,d=0.5,sig.level=0.05/20000)
+pwr.t.test(n=100,d=0.75,sig.level=0.05/20000)
+pwr.t.test(n=100,d=1,sig.level=0.05/20000)
+cbind((demo$DOD+ 24*60*60-demo$Decannul_date)/24,demo$DOT+ 24*60*60-demo$Decannul_date,7)
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]
+meds[1:5,]
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	try(out[out$time < -1*(decan-24),]$value <- NA)#
+#
+	#Plot lines#
+	#out.window <- rollingaverage(out, -7 * 24, decan + 7 * 24, 6)#
+	out.window <- rollingaverage(out, -20, 96, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3, lty=3, col="palevioletred4")
+out.plot
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	try(out[out$time < -1*(decan-24),]$value <- NA)#
+#
+	#Plot lines#
+	#out.window <- rollingaverage(out, -7 * 24, decan + 7 * 24, 6)#
+	out.window <- rollingaverage(out, -72, 72, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3, lty=3, col="palevioletred4")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	try(out[out$time < -1*(decan-24),]$value <- NA)#
+#
+	#Plot lines#
+	#out.window <- rollingaverage(out, -7 * 24, decan + 7 * 24, 6)#
+	out.window <- rollingaverage(out, -20, 96, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(decan-24 < 84 && decan -24 > 0) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3, lty=3, col="palevioletred4")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	try(out[out$time < -1*(decan-24),]$value <- NA)#
+#
+	#Plot lines#
+	#out.window <- rollingaverage(out, -7 * 24, decan + 7 * 24, 6)#
+	out.window <- rollingaverage(out, -72, 72, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(decan-24 < 84 && decan -24 > 0) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3, lty=3, col="palevioletred4")
+cbind((demo$DOD+ 24*60*60-demo$Decannul_date)/24,demo$DOT+ 24*60*60-demo$Decannul_date,7)
+demo$FINALtime2
+demo[demo$FINALtime2 < 1,]$FINALtime2 <- 0
+demo[demo$FINALtime2 < 1,]$FINALtime2
+demo[demo$FINALtime2 < 5,]$FINALtime2
+demo[demo$FINALtime2 < 24,]$FINALtime2
+demo[demo$FINALtime2 <= 24,]$FINALtime2 <- 0
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	try(out[out$time < -1*(decan-24),]$value <- NA)#
+#
+	#Plot lines#
+	#out.window <- rollingaverage(out, -7 * 24, decan + 7 * 24, 6)#
+	out.window <- rollingaverage(out, -72, 72, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(decan-24 < 84 && decan -24 > 0) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3, lty=3, col="palevioletred4")
+#Load libraries#
+library(matrixStats)#
+library(plyr)#
+#
+#Read in drug data; make sure to export as tab-delimited rather than csv to prevent rounding to 2 decimal places#
+meds <- read.table("/Users/julirsch/Desktop/ECMO/Sedation Subtable_2.12.17.txt",header=T,sep="\t")#
+#
+#Rename drug columns#
+names(meds) <- c("Name","MRN","Cannul_date","Decannul_date","Weight","Midaz_cont_abs","Midaz_cont_rel","Midaz_cont_date","Midaz_cont_cannul_hours","Midaz_cont_decannul_hours","Midaz_bolus_abs","Midaz_bolus_rel","Midaz_bolus_date","Midaz_bolus_cannul_hours","Midaz_bolus_decannul_hours","Fent_cont_abs","Fent_cont_rel","Fent_cont_date","Fent_cont_cannul_hours","Fent_cont_decannul_hours","Fent_bolus_abs","Fent_bolus_rel","Fent_bolus_date","Fent_bolus_cannul_hours","Fent_bolus_decannul_hours","Morph_cont_abs","Morph_cont_rel","Morph_cont_date","Morph_cont_cannul_hours","Morph_cont_decannul_hours","Morph_bolus_abs","Morph_bolus_rel","Morph_bolus_date","Morph_bolus_cannul_hours","Morph_bolus_decannul_hours","Dex_cont_rel","Dex_cont_date","Dex_cont_cannul_hours","Dex_cont_decannul_hours","Ket_cont_rel","Ket_cont_date","Ket_cont_cannul_hours","Ket_cont_decannul_hours","Ket_bolus_abs","Ket_bolus_rel","Ket_bolus_date","Ket_bolus_cannul_hours","Ket_bolus_decannul_hours","Prop_cont_rel","Prop_cont_date","Prop_cont_cannu
+l_hours","Prop_cont_decannul_hours","Meth_cont_abs","Meth_cont_date","Meth_cont_cannul_hours","Meth_cont_decannul_hours","Loraz_cont_abs","Loraz_cont_date","Loraz_cont_cannul_hours","Loraz_cont_decannul_hours","Diaz_cont_abs","Diaz_cont_date","Diaz_cont_decannul_hours","Pheno_cont_abs","Pheno_cont_date","Pheno_cont_decannul_hours","WATS","WATS_date")#
+#
+#Read in demographic data#
+demo <- read.table("/Users/julirsch/Desktop/ECMO/Demographics Subtable 2.12.17.txt",header=T,sep="\t")
+#Rename demographic data columns#
+names(demo) <- c("Name","MRN","DOB","DOA","DOD","DOT","Sex","Weight","Circuit","Type","Reason","HRF","Cannul_date","Decannul_date","Circuit_change","Circuit_change_date")#
+#
+#Remove cases that were re-cannulated for now#
+meds <- meds[!(meds$Name=="Martinez"),]#
+demo <- demo[!(demo$Name=="Martinez"),]#
+#
+###########################
+#Just getting started, useful functions here#
+###########################
+#
+#Convert string to date#
+meds$Cannul_date <- as.vector(strptime(meds$Cannul_date,"%m/%d/%y %H:%M"))#
+meds$Decannul_date <- as.vector(strptime(meds$Decannul_date,"%m/%d/%y %H:%M"))#
+demo$Cannul_date <- as.vector(strptime(demo$Cannul_date,"%m/%d/%y %H:%M"))#
+demo$Decannul_date <- as.vector(strptime(demo$Decannul_date,"%m/%d/%y %H:%M"))#
+demo$DOB <- as.vector(strptime(demo$DOB,"%m/%d/%y"))#
+demo$DOD <- as.vector(strptime(demo$DOD,"%m/%d/%y"))#
+demo$DOB <- demo$DOB + 24*60*60#
+demo$DOT <- as.vector(strptime(demo$DOT,"%m/%d/%y"))#
+demo$DOA <- as.vector(strptime(demo$DOA,"%m/%d/%y"))#
+#
+#Calculate some time differences#
+meds$ECMOtime <- meds$Decannul_date-meds$Cannul_date#
+demo$ECMOtime <- demo$Decannul_date-demo$Cannul_date#
+demo$FINALtime <- rowMins(cbind(demo$DOD-demo$Cannul_date+1,demo$DOT-demo$Cannul_date+1,7),na.rm=T)*24#
+#demo$FINALtime2 <- rowMins(cbind(demo$DOD+ 24*60*60-demo$Decannul_date,demo$DOT+ 24*60*60-demo$Decannul_date,7*24),na.rm=T)#
+demo$FINALtime2 <- rowMins(cbind((demo$DOD+ 24*60*60-demo$Decannul_date)/24,demo$DOT+ 24*60*60-demo$Decannul_date,7),na.rm=T)*24#
+demo[demo$FINALtime2 <= 24,]$FINALtime2 <- 0#
+#
+#Density plot of time on ECMO#
+mean(unique(demo$ECMOtime))#
+plot(density((unique(demo$ECMOtime))))#
+#
+#Loop through and create for every hour a dose value#
+byHour <- function(df, hours, value, start, stop, step, size, type) {#
+#
+	temp <- df[, c(hours, value)]#
+	names(temp) <- c("hours", "value")#
+	temp$hours <- gsub("h", "", temp$hours)#
+	temp <- temp[complete.cases(temp), ]#
+#
+	if (dim(temp)[1] > 1) {#
+#
+		temp <- aggregate(temp$value, by = list(temp$hours), sum)#
+		names(temp) <- c("hours", "value")#
+#
+		temp.time <- seq(start, stop, 1)#
+		temp.ts <- data.frame(temp.time)#
+		names(temp.ts) <- "time"#
+		temp.ts$value <- 0#
+#
+		update.val.old <- 0#
+		for (i in temp.time) {#
+			update.val <- temp[temp$hours == i, ]$value#
+			if (length(update.val) > 0) {#
+				temp.ts[temp.ts$time == i, ]$value <- update.val#
+				update.val.old <- update.val#
+			} else if (type == "continuous") {#
+				temp.ts[temp.ts$time == i, ]$value <- update.val.old#
+			}#
+		}#
+		return(temp.ts)#
+	} else {#
+		temp.time <- seq(start, stop, 1)#
+		temp.ts <- data.frame(temp.time)#
+		names(temp.ts) <- "time"#
+		temp.ts$value <- 0#
+#
+		return(temp.ts)#
+	}#
+}#
+#
+#Calculate rolling average from byHour dataset#
+rollingaverage <- function(df, start, stop, step) {#
+	temp <- df#
+	temp.out <- data.frame()#
+	for (i in seq(start + step, stop - step, step)) {#
+		temp.out <- rbind(temp.out, c(i, mean(temp[temp$time >= i - step & temp$time <= i + step, ]$value)))#
+	}#
+	names(temp.out) <- c("hours", "value")#
+	return(temp.out)#
+}
+#########################
+#Run decannulation things#
+#########################
+#
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	try(out[out$time < -1*(decan-24),]$value <- NA)#
+#
+	#Plot lines#
+	#out.window <- rollingaverage(out, -7 * 24, decan + 7 * 24, 6)#
+	out.window <- rollingaverage(out, -72, 72, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(decan-24 < 84 && decan -24 > 0) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3, lty=3, col="palevioletred4")
+#########################
+#Run decannulation things#
+#########################
+#
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.2),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	try(out[out$time < -1*(decan-24),]$value <- NA)#
+#
+	#Plot lines#
+	#out.window <- rollingaverage(out, -7 * 24, decan + 7 * 24, 6)#
+	out.window <- rollingaverage(out, -72, 72, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(decan-24 < 84 && decan -24 > 0) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3, lty=3, col="palevioletred4")
+stop
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	try(out[out$time < -1*(decan-24),]$value <- NA)#
+#
+	#Plot lines#
+	#out.window <- rollingaverage(out, -7 * 24, decan + 7 * 24, 6)#
+	out.window <- rollingaverage(out, -72, 72, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.2),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	try(out[out$time < -1*(decan-24),]$value <- NA)#
+#
+	#Plot lines#
+	#out.window <- rollingaverage(out, -7 * 24, decan + 7 * 24, 6)#
+	out.window <- rollingaverage(out, -72, 72, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	try(out[out$time < -1*(decan-24),]$value <- NA)#
+#
+	#Plot lines#
+	#out.window <- rollingaverage(out, -7 * 24, decan + 7 * 24, 6)#
+	out.window <- rollingaverage(out, -72, 72, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3, lty=3, col="palevioletred4")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.2),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	try(out[out$time < -1*(decan-24),]$value <- NA)#
+#
+	#Plot lines#
+	#out.window <- rollingaverage(out, -7 * 24, decan + 7 * 24, 6)#
+	out.window <- rollingaverage(out, -72, 72, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3, lty=3, col="palevioletred4")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_cannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_cannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old <- out#
+	try(out[out$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old.window <- rollingaverage(out.old, -20, 96, 6)#
+	out.window <- rollingaverage(out, -20, 96, 6)#
+	#print(out.window)#
+	lines(out.old.window[, 1], out.old.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(decan-24 < 84 && decan -24 > 0) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3, lty=3, col="palevioletred4")
+##########
+#
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_cannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_cannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old.window <- rollingaverage(out.old, -20, 96, 6)#
+	out.window <- rollingaverage(out, -20, 96, 6)#
+	#print(out.window)#
+	lines(out.old.window[, 1], out.old.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(decan-24 < 84 && decan -24 > 0) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3, lty=3, col="palevioletred4")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_cannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_cannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time < decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(decan-24 < 84 && decan -24 > 0) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot1 <- aggregate(out.temp1,by=list(out.temp1$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot1[, 2], out.plot1[, 3],lwd = 3, lty=3, col="palevioletred4")#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3, lty=3, col="palevioletred4")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_cannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_cannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time < decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(decan-24 < 84 && decan -24 > 0) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot1 <- aggregate(out.temp1,by=list(out.temp1$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot1[, 2], out.plot1[, 3],lwd = 4, lty=3, col="palevioletred4")#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 4, lty=3, col="springgreen4")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_cannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_cannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time < decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(decan-24 < 84 && decan -24 > 0) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 4, lty=1, col="palevioletred4")
+out.old2.window
+j= 4564867
+j
+4564867="4564867"
+j="4564867"
+meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time < decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)
+out.old2.window
+decan
+print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)
+out.old2.window
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_cannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_cannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(decan-24 < 84 && decan -24 > 0) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 4, lty=1, col="palevioletred4")
+#########################
+#Run cannulation things#
+#########################
+#
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_cannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_cannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 4, lty=1, col="palevioletred4")
+meds[1:5,]
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_cannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_cannul_hours"
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_cannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 4, lty=1, col="palevioletred4")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_cannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,1.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 4, lty=1, col="palevioletred4")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.0, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 4, lty=1, col="palevioletred4")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_cannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.0, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 4, lty=1, col="palevioletred4")
+#Choose drug#
+drug <- "Fent"#
+drug_cont_val <- "Fent_cont_rel"#
+drug_cont_hours <- "Fent_cont_cannul_hours" #
+drug_bolus_val <- "Fent_bolus_rel"#
+drug_bolus_hours <- "Fent_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,200),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 4, lty=1, col="palevioletred4")
+#Choose drug#
+drug <- "Fent"#
+drug_cont_val <- "Fent_cont_rel"#
+drug_cont_hours <- "Fent_cont_cannul_hours" #
+drug_bolus_val <- "Fent_bolus_rel"#
+drug_bolus_hours <- "Fent_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,25),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 4, lty=1, col="palevioletred4")
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 4, lty=1, col="grey72")
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 4, lty=1, col="grey22")
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,25),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 2, lty=1, col="grey72")
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 2, lty=1, col="grey22")
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3, lty=1, col="grey22")
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_cannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_cannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#########################
+#Run decannulation things#
+#########################
+#
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	try(out[out$time < -1*(decan-24),]$value <- NA)#
+#
+	#Plot lines#
+	#out.window <- rollingaverage(out, -7 * 24, decan + 7 * 24, 6)#
+	out.window <- rollingaverage(out, -72, 72, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=3, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan-24),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -72, 72, 6)#
+	out.window <- rollingaverage(out, -72, 72, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="deepskyblue3",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="lightcoral")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="deepskyblue3")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="deepskyblue3",lty=1)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="lightcoral",lty=2)#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="deepskyblue3")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="black")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+######################
+#
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#########################
+#Run decannulation things#
+#########################
+#
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="darkorchid4")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_cannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#########################
+#Run decannulation things#
+#########################
+#
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="darkorchid4")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+demo$ECMOtime
+#########################
+#Run decannulation things#
+#########################
+#
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="seagreen4")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#########################
+#Run decannulation things#
+#########################
+#
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="palegreen3")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#########################
+#Run decannulation things#
+#########################
+#
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="seagreen4")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#########################
+#Run decannulation things#
+#########################
+#
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse3")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#########################
+#Run decannulation things#
+#########################
+#
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_cannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_cannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_decannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+meds[1:5,]
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_decannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_decannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.5),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.5),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Fent"#
+drug_cont_val <- "Fent_cont_rel"#
+drug_cont_hours <- "Fent_cont_decannul_hours" #
+drug_bolus_val <- "Fent_bolus_rel"#
+drug_bolus_hours <- "Fent_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,25),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Fent"#
+drug_cont_val <- "Fent_cont_rel"#
+drug_cont_hours <- "Fent_cont_cannul_hours" #
+drug_bolus_val <- "Fent_bolus_rel"#
+drug_bolus_hours <- "Fent_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,25),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Fent"#
+drug_cont_val <- "Fent_cont_rel"#
+drug_cont_hours <- "Fent_cont_decannul_hours" #
+drug_bolus_val <- "Fent_bolus_rel"#
+drug_bolus_hours <- "Fent_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,25),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+	try(out.old2[out.old2$time < -1*(decan-24),]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.old2.window <- rollingaverage(out.old2, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 84) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_decannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.5),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_cannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_decannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.5),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+	try(out.old2[out.old2$time < -1*(decan-24),]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.old2.window <- rollingaverage(out.old2, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 84) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_decannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.5),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_decannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.75),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_cannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,0.75),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_decannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Morph"#
+drug_cont_val <- "Morph_cont_rel"#
+drug_cont_hours <- "Morph_cont_decannul_hours" #
+drug_bolus_val <- "Morph_bolus_rel"#
+drug_bolus_hours <- "Morph_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0.8,2.0),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_cannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,0.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_cannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,0.4),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_cannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0.4,1.2),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.5),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,1.0),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.5),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,0.6),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0.6,1.2),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0.6,1.4),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Fent"#
+drug_cont_val <- "Fent_cont_rel"#
+drug_cont_hours <- "Fent_cont_cannul_hours" #
+drug_bolus_val <- "Fent_bolus_rel"#
+drug_bolus_hours <- "Fent_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,25),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Fent"#
+drug_cont_val <- "Fent_cont_rel"#
+drug_cont_hours <- "Fent_cont_cannul_hours" #
+drug_bolus_val <- "Fent_bolus_rel"#
+drug_bolus_hours <- "Fent_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,15),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Fent"#
+drug_cont_val <- "Fent_cont_rel"#
+drug_cont_hours <- "Fent_cont_cannul_hours" #
+drug_bolus_val <- "Fent_bolus_rel"#
+drug_bolus_hours <- "Fent_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0,25),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Fent"#
+drug_cont_val <- "Fent_cont_rel"#
+drug_cont_hours <- "Fent_cont_decannul_hours" #
+drug_bolus_val <- "Fent_bolus_rel"#
+drug_bolus_hours <- "Fent_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,25),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Fent"#
+drug_cont_val <- "Fent_cont_rel"#
+drug_cont_hours <- "Fent_cont_decannul_hours" #
+drug_bolus_val <- "Fent_bolus_rel"#
+drug_bolus_hours <- "Fent_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0,20),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")#
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0.5,1.2),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_decannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_decannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-72,72),ylim=c(0.5,5.0),xlab="Hours from decannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime2#
+	#start <- round_any(max(-72,-1*decan+24),6)#
+#
+	#Create hourly dataset for case j#
+	#Cannulation specific#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	#Decannulation specific#
+	#out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "continuous")#
+	#out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -1*(round(decan) - round(decan) %% 6)-7*24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	try(out[out$time < -1*(decan),]$value <- NA)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -84, 84, 6)#
+	out.window <- rollingaverage(out, -84, 84, 6)#
+	print(out.window)#
+	#out.window <- rollingaverage(out, -7 * 24 - round(decan), 7 * 24, 6)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	if(stop < 168) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="chartreuse2")#
+	}#
+	out.temp <- rbind(out.temp,out.window)#
+	print(paste("finished with",j))#
+#	if(max(out.window$value) > 8) {#
+#		print(j)#
+#	}#
+#
+}#
+#
+out.plot <- aggregate(out.temp,by=list(out.temp$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot[, 2], out.plot[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_cannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0.35,2.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_cannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0.35,3.0),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+#Choose drug#
+drug <- "Midaz"#
+drug_cont_val <- "Midaz_cont_rel"#
+drug_cont_hours <- "Midaz_cont_cannul_hours" #
+drug_bolus_val <- "Midaz_bolus_rel"#
+drug_bolus_hours <- "Midaz_bolus_cannul_hours"#
+#Set up plot#
+plot(1,1,col="white",xlim=c(-20,100),ylim=c(0.4,3.5),xlab="Hours from cannulation (0)",ylab="Drug in 6 hours intervals")
+#Set up dataframe#
+meds.temp <- meds[,c("Name","MRN",names(meds)[grep(drug,names(meds))])]#
+#
+#Create plot of drug for each case#
+out.temp1 <- NULL#
+out.temp2 <- NULL#
+for (j in unique(meds.temp$MRN)) {#
+	print(paste("started with",j))#
+	#Subset to case j#
+	meds.temp.test <- meds.temp[meds.temp$MRN == j, ]#
+#
+	#Calculate decannulation time for case j#
+	decan <- unique(meds[meds$MRN == j, ]$ECMOtime)#
+	#Grab DOD or DOT#
+	stop <- demo[demo$MRN ==j, ]$FINALtime#
+	#Create hourly dataset for case j#
+	out.cont <- byHour(meds.temp.test, drug_cont_hours, drug_cont_val, -7 * 24, stop, 6, 6, "continuous")#
+	out.bol <- byHour(meds.temp.test, drug_bolus_hours, drug_bolus_val, -7 * 24, stop, 6, 6, "bolus")#
+	out <- out.bol#
+	out <- out.cont#
+	out$value <- out.cont$value + out.bol$value#
+	out.old1 <- out#
+	out.old2 <- out#
+	try(out[out$time > decan,]$value <- NA, silent=T)#
+	try(out.old2[out.old2$time > decan-24,]$value <- NA, silent=T)#
+#
+	#Plot lines#
+	out.old1.window <- rollingaverage(out.old1, -26, 102, 6)#
+	out.old2.window <- rollingaverage(out.old2, -26, 102, 6)#
+	out.window <- rollingaverage(out, -26, 102, 6)#
+	#print(out.window)#
+	lines(out.old1.window[, 1], out.old1.window[, 2],lwd = 1, col="lightcoral",lty=2)#
+	lines(out.window[, 1], out.window[, 2],lwd = 1.5, col="deepskyblue3")#
+	#if(decan-24 < 84 && decan -24 > 0) {#
+	if(decan<102) {#
+		out.window.cc <- out.window[complete.cases(out.window),]#
+		points(out.window.cc[dim(out.window.cc)[1], 1], out.window.cc[dim(out.window.cc)[1], 2],pch = 20, col="lightcoral")#
+	}#
+	out.temp1 <- rbind(out.temp1,out.old1.window)#
+	out.temp2 <- rbind(out.temp2,out.old2.window)#
+	#print(paste("finished with",j))#
+	#if(ifelse(max(out.window$value) > 0.3,TRUE!is.na(max(out.window$value))) {#
+	#	print(j)#
+	#}#
+#
+}#
+#
+out.plot2 <- aggregate(out.temp2,by=list(out.temp2$hours),function(x) {mean(x,na.rm=T)})#
+lines(out.plot2[, 2], out.plot2[, 3],lwd = 3.5, lty=1, col="grey22")
+demo[1:5,]
+dim(demo)
+mean(demo$Cannul_date-demo$DOB)
+mean(demo$Cannul_date-demo$DOB)/24
+mean(demo$Cannul_date-demo$DOB)/24/7
+sd(demo$Cannul_date-demo$DOB)/24/7
+mean(demo$Weight)
+sd(demo$Weight)
+mean(demo$ECMOtime)
+mean(demo$ECMOtime)/24
+sd(demo$ECMOtime)/24
+ls()
+results[1:5,]
+dim(results)
+ls()
+UTR5[1:5,]
+UTR5
+library(limma)#
+library(gplots)#
+library(sva)#
+library(biomaRt)#
+library(plyr)#
+library(xtail)#
+library(readr)#
+library(reshape2)#
+library(stringr)#
+library(corrplot)#
+library(ddply)#
+library(ggplot2)#
+library(gridExtra)
+#Read in CAGE UTR5#
+UTR5.width <- sum(width(UTR5.out))#
+UTR5.width.df <- as.data.frame(UTR5.width)#
+UTR5.width.df$gene <- gsub(",.*","",names(UTR5.width))#
+UTR5.width.df$transcript <- gsub(".*,","",names(UTR5.width))#
+UTR5.width.df2 <- ddply(UTR5.width.df,.(gene), numcolwise(min),.drop=F)#
+#
+#Get sequences for CAGE#
+library("GenomicFeatures")#
+library(BSgenome.Hsapiens.UCSC.hg19)genome <- BSgenome.Hsapiens.UCSC.hg19#
+UTR5.seqs <- extractTranscriptSeqs(genome, UTR5.out)#
+UTR5.seqs.df <- cbind(UTR5.seqs@ranges,as.data.frame(UTR5.seqs))#
+UTR5.seqs.df$gene <- gsub(",.*","",UTR5.seqs.df$names)#
+UTR5.seqs.df2 <- UTR5.seqs.df %>%#
+	group_by(gene) %>%#
+	filter(width == min(width))#
+UTR5.seqs.df2 <-  UTR5.seqs.df2[!duplicated(UTR5.seqs.df2$gene),]
+library(ddply)
+library(dplyr)
+#Read in CAGE UTR5#
+UTR5.width <- sum(width(UTR5.out))#
+UTR5.width.df <- as.data.frame(UTR5.width)#
+UTR5.width.df$gene <- gsub(",.*","",names(UTR5.width))#
+UTR5.width.df$transcript <- gsub(".*,","",names(UTR5.width))#
+UTR5.width.df2 <- ddply(UTR5.width.df,.(gene), numcolwise(min),.drop=F)#
+#
+#Get sequences for CAGE#
+library("GenomicFeatures")#
+library(BSgenome.Hsapiens.UCSC.hg19)genome <- BSgenome.Hsapiens.UCSC.hg19#
+UTR5.seqs <- extractTranscriptSeqs(genome, UTR5.out)#
+UTR5.seqs.df <- cbind(UTR5.seqs@ranges,as.data.frame(UTR5.seqs))#
+UTR5.seqs.df$gene <- gsub(",.*","",UTR5.seqs.df$names)#
+UTR5.seqs.df2 <- UTR5.seqs.df %>%#
+	group_by(gene) %>%#
+	filter(width == min(width))#
+UTR5.seqs.df2 <-  UTR5.seqs.df2[!duplicated(UTR5.seqs.df2$gene),]
+#Define clean 5' UTR set#
+temp <- merge(results,UTR5.seqs.df2,by.x="Row.names",by.y="gene")#
+temp <- temp[temp$width < 500,]#
+temp <- temp[temp$width >= 0,]
+dim(temp)
+temp[1:5,]
+temp$UTR5.pyr <- temp$width;
+TE.D.FDR10 <- temp[temp$pvalue.adjust < 0.1 & temp$log2FC_TE_final > 0,]$UTR5.pyr#
+mean(TE.D.FDR10)
+test <- read.table("/Users/julirsch/Desktop/UTR5.sequences.HemTF.txt")
+test
+ls -la
+length(test)
+apply(test,1,nchar)
+mean(apply(test,1,nchar))
+TE.D.FDR10 <- temp[temp$pvalue.adjust < 0.1 & temp$log2FC_TE_final > 0,]$UTR5.pyr#
+mean(TE.D.FDR10)
+TE.D.FDR10 <- temp[temp$pvalue.adjust < 0.1 & temp$log2FC_TE_final > 0,]$UTR5.pyr#
+median(TE.D.FDR10)
+median(apply(test,1,nchar))
+.Call("rma_c_complete"
+)
+#Load libraries#
+library(oligo)#
+library(annotate)#
+library(dplyr)#
+library(preprocessCore)#
+library(irlba)#
+library(sva)#
+library(hgu133a.db)#
+library(matrixStats)#
+library(ggplot2)#
+#
+#Read in data for each experiment on GEO#
+geneCELs <- list.celfiles("/Users/julirsch/Documents/DBA_Bodine/GSE22552_RAW/", full.names = TRUE, listGzipped=T) #
+affyGeneFS.GSE22552 <- read.celfiles(geneCELs)
+source("https://bioconductor.org/biocLite.R")#
+biocLite("SCAN.UPC")
+library(SCAN.UPC)
+geneCELs <- list.celfiles("/Users/julirsch/Documents/DBA_Bodine/GSE22552_RAW/", full.names = TRUE, listGzipped=T)
+library(oligo)
+geneCELs <- list.celfiles("/Users/julirsch/Documents/DBA_Bodine/GSE22552_RAW/", full.names = TRUE, listGzipped=T)
+geneCELs <- list.celfiles("/Users/julirsch/Documents/DBA_Bodine/GSE22552_RAW/", full.names = TRUE)
+geneCELs
+geneCELs[1]
+out <- SCAN(geneCELs[1])
+out
+out[1:5,]
+exprs(out)[1:5,1:5]
+exprs(out)[1:5]
+assayData(out)
+out@assayData
+out@assayData$exprs
+out <- SCAN(geneCELs[1:2])
+out
+combine()
+combine(out,out)
+out
+library(SCAN)
+library(SCAN.UPC)
+geneCELs.GSE22552 <- list.celfiles("/Users/julirsch/Documents/DBA_Bodine/GSE22552_RAW/", full.names = TRUE)
+out <- SCAN("/Users/julirsch/Documents/DBA_Bodine/GSE22552_RAW/*")
+out
+dim(out)
+boxplot(out)
+gsub("_.*","",colnames(affyGeneFS.GSE24759)) %in% paste0("GSM",seq(609677,609709,1))
+affyGeneFS.GSE24759 <- affyGeneFS.GSE24759[,gsub("_.*","",colnames(affyGeneFS.GSE24759)) %in% paste0("GSM",seq(609677,609709,1))]
+affyGeneFS.GSE24759 <- read.celfiles(geneCELs.GSE24759, pkgname="pd.ht.hg.u133a")#
+geneCELs.GSE34268 <- list.celfiles("/Users/julirsch/Documents/DBA_Bodine/GSE34268_RAW/", full.names = TRUE)
+geneCELs.GSE24759 <- list.celfiles("/Users/julirsch/Documents/DBA_Bodine/GSE24759_RAW/", full.names = TRUE) #
+affyGeneFS.GSE24759 <- read.celfiles(geneCELs.GSE24759, pkgname="pd.ht.hg.u133a")
+gsub("_.*","",colnames(affyGeneFS.GSE24759)) %in% paste0("GSM",seq(609677,609709,1))
+affyGeneFS.GSE24759 <- affyGeneFS.GSE24759[,gsub("_.*","",colnames(affyGeneFS.GSE24759)) %in% paste0("GSM",seq(609677,609709,1))]
+affyGeneFS.GSE24759
+protocolData(affyGeneFS.GSE24759)
+protocolData(affyGeneFS.GSE24759)
+affyGeneFS.GSE24759@protocolData@varMetadata
+affyGeneFS.GSE24759@protocolData@data
+SCAN.GSE22552 <- out
+saveRDS(SCAN.GSE22552,"../processed/SCAN.GSE22552.rds")
+saveRDS(SCAN.GSE22552,"../processed/SCAN.GSE22552.rds")
+setwd("Documents/DBA_Bodine/dba_letter/")
+saveRDS(SCAN.GSE22552,"../processed/SCAN.GSE22552.rds")
+saveRDS(SCAN.GSE22552,file="../processed/SCAN.GSE22552.rds")
+saveRDS(SCAN.GSE22552,file="../processed/SCAN.GSE22552.rds")
+setwd("scripts")
+setwd("code")
+saveRDS(SCAN.GSE22552,file="../processed/SCAN.GSE22552.rds")
