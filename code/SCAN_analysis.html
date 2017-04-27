@@ -11,7 +11,7 @@
 
 <meta name="author" content="Jacob C Ulirsch" />
 
-<meta name="date" content="2017-04-25" />
+<meta name="date" content="2017-04-27" />
 
 <title>Analyze GSE89540 with reference data using SCAN (pre-processing)</title>
 
@@ -119,7 +119,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Analyze GSE89540 with reference data using SCAN (pre-processing)</h1>
 <h4 class="author"><em>Jacob C Ulirsch</em></h4>
-<h4 class="date"><em>2017-04-25</em></h4>
+<h4 class="date"><em>2017-04-27</em></h4>
 
 </div>
 
@@ -131,8 +131,6 @@ saveRDS(SCAN.GSE22552,&quot;../processed/SCAN.GSE22552.rds&quot;)
 SCAN.GSE24759 &lt;- SCAN(&quot;../data/GSE24759_RAW/*&quot;, annotationPackageName=&quot;pd.ht.hg.u133a&quot;)
 saveRDS(SCAN.GSE24759,&quot;../processed/SCAN.GSE24759.rds&quot;)
 SCAN.GSE34268 &lt;- SCAN(&quot;../data/GSE34268_RAW/*&quot;)
-saveRDS(SCAN.GSE34268,&quot;../processed/SCAN.GSE34268.rds&quot;)
-SCAN.GSE41599 &lt;- SCAN(&quot;../data/GSE41599_RAW/*&quot;)
 saveRDS(SCAN.GSE41599,&quot;../processed/SCAN.GSE41599.rds&quot;)
 SCAN.GSE41817 &lt;- SCAN(&quot;../data/GSE41817_RAW/*&quot;)
 saveRDS(SCAN.GSE41817,&quot;../processed/SCAN.GSE41817.rds&quot;)
@@ -161,18 +159,6 @@ fData(SCAN.GSE24759) &lt;- data.frame(ID=ID,Symbol=Symbol)
 exprs.GSE24759 &lt;- as.data.frame(exprs(SCAN.GSE24759))
 exprs.GSE24759$gene &lt;- as.vector(fData(SCAN.GSE24759)$Symbol)
 exprs.GSE24759 &lt;- exprs.GSE24759 %&gt;%
-  filter(gene != &quot;&lt;NA&gt;&quot;) %&gt;%
-  group_by(gene) %&gt;%
-  summarise_each(funs(max))
-# GSE34268
-library(hgu133a.db)
-annotation(SCAN.GSE34268) &lt;- &quot;hgu133a.db&quot;
-ID &lt;- featureNames(SCAN.GSE34268)
-Symbol &lt;- getSYMBOL(ID,&quot;hgu133a.db&quot;)
-fData(SCAN.GSE34268) &lt;- data.frame(ID=ID,Symbol=Symbol)
-exprs.GSE34268 &lt;- as.data.frame(exprs(SCAN.GSE34268))
-exprs.GSE34268$gene &lt;- as.vector(fData(SCAN.GSE34268)$Symbol)
-exprs.GSE34268 &lt;- exprs.GSE34268 %&gt;%
   filter(gene != &quot;&lt;NA&gt;&quot;) %&gt;%
   group_by(gene) %&gt;%
   summarise_each(funs(max))
@@ -213,31 +199,167 @@ exprs.GSE89540 &lt;- exprs.GSE89540 %&gt;%
   group_by(gene) %&gt;%
   summarise_each(funs(max))</code></pre>
 <p>Merge datasets together by gene name and convert from GSM to human interpretable sample names</p>
-<pre class="r"><code>combined &lt;- list(exprs.GSE22552, exprs.GSE24759, exprs.GSE34268, exprs.GSE41599, exprs.GSE41817, exprs.GSE89540) %&gt;%
+<pre class="r"><code>combined &lt;- list(exprs.GSE22552, exprs.GSE24759, exprs.GSE41599, exprs.GSE41817, exprs.GSE89540) %&gt;%
   Reduce(function(dtf1,dtf2) inner_join(dtf1,dtf2,by=&quot;gene&quot;), .)
 names(combined) &lt;- gsub(&quot;.CEL.gz&quot;,&quot;&quot;,gsub(&quot;_.*&quot;,&quot;&quot;,names(combined)))
 samples &lt;- read.table(&quot;../data/Samples.txt&quot;,sep=&quot;\t&quot;,stringsAsFactors=F)
-names(samples) &lt;- c(&quot;GSM&quot;,&quot;name&quot;,&quot;GSE&quot;,&quot;stage&quot;)
+names(samples) &lt;- c(&quot;GSM&quot;,&quot;name&quot;,&quot;GSE&quot;,&quot;stage&quot;,&quot;group1&quot;,&quot;group2&quot;)
 samples$GSM &lt;- factor(samples$GSM,levels=names(combined),ordered=T)
 samples &lt;- samples[order(samples$GSM),]
+samples &lt;- samples %&gt;% filter(samples$GSM %in% names(combined))
 names(combined) &lt;- c(&quot;gene&quot;,samples$name)
-combined.t &lt;- data.frame(t(combined[,-1]))
-names(combined.t) &lt;- combined$gene</code></pre>
-<p>Batch normalize! Can choose model with only intercept or include covariate for a rough sorted “stage”</p>
-<pre class="r"><code>modcombat &lt;- model.matrix(~1, data=combined.t)
-modcombat &lt;- model.matrix(~1 + samples$stage, data=combined.t)
-combined.bn &lt;- ComBat(dat=combined[,-1], batch=as.factor(samples$GSE), mod=modcombat, par.prior=TRUE, prior.plots=F)</code></pre>
-<pre><code>## Found 6 batches
-## Adjusting for 1 covariate(s) or covariate level(s)
+combined &lt;- data.frame(combined)
+row.names(combined) &lt;- combined$gene
+combined &lt;- combined[,-1]
+combined.t &lt;- data.frame(t(combined))
+names(combined.t) &lt;- row.names(combined)</code></pre>
+<p>Batch normalize! Can choose model with only intercept or include covariate for a rough sorted “stage”. Really should only include studies with multiple stages (e.g. two references and O’Brien et al) otherwise completely confounded.</p>
+<pre class="r"><code>keep &lt;- samples %&gt;% 
+  filter(GSE %in% c(&quot;GSE22552&quot;, &quot;GSE24759&quot;, &quot;GSE89540&quot;)) %&gt;% 
+  filter(group1 != &quot;&quot;)
+combined.temp &lt;- data.frame(combined) %&gt;% 
+  dplyr::select(one_of(keep$name))
+combined.temp.t &lt;- data.frame(t(combined.temp))
+names(combined.temp.t) &lt;- row.names(combined.temp)
+modcombat &lt;- model.matrix(~1, data=combined.temp.t)
+#modcombat &lt;- model.matrix(~1 + samples$stage, data=combined.t)
+combined.bn &lt;- ComBat(dat=combined.temp, batch=as.factor(keep$GSE), mod=modcombat, par.prior=TRUE, prior.plots=F)</code></pre>
+<pre><code>## Found 3 batches
+## Adjusting for 0 covariate(s) or covariate level(s)
 ## Standardizing Data across genes
 ## Fitting L/S model and finding priors
 ## Finding parametric adjustments
 ## Adjusting the Data</code></pre>
-<pre class="r"><code>row.names(combined.bn) &lt;- combined$gene
+<pre class="r"><code>row.names(combined.bn) &lt;- row.names(combined)
 combined.bn.t &lt;- data.frame(t(combined.bn))</code></pre>
-<p>Done with pre-processing. Save both normalized and normalized + batch normalized data.</p>
-<pre class="r"><code>saveRDS(combined,&quot;../processed/Combined_SCAN.rds&quot;)
-saveRDS(combined.bn,&quot;../processed/Combined_SCAN_BN.rds&quot;)</code></pre>
+<p>Split both normalized and normalized + batch normalized into data frames for each study.</p>
+<pre class="r"><code># GSE22552 BN
+keep &lt;- samples %&gt;% 
+  filter(GSE == &quot;GSE22552&quot;) %&gt;% 
+  filter(group1 != &quot;&quot;) %&gt;% 
+  .$name 
+combined.bn.GSE22552 &lt;- data.frame(combined.bn) %&gt;% 
+  dplyr::select(one_of(keep))
+# GSE24759 BN
+keep &lt;- samples %&gt;% 
+  filter(GSE == &quot;GSE24759&quot;) %&gt;% 
+  filter(group1 != &quot;&quot;) %&gt;% 
+  .$name 
+combined.bn.GSE24759 &lt;- data.frame(combined.bn) %&gt;% 
+  dplyr::select(one_of(keep))
+# GSE89540 BN
+keep &lt;- samples %&gt;% 
+  filter(GSE == &quot;GSE89540&quot;) %&gt;% 
+  filter(group1 != &quot;&quot;) %&gt;% 
+  .$name 
+combined.bn.GSE89540 &lt;- data.frame(combined.bn) %&gt;% 
+  dplyr::select(one_of(keep))
+# GSE22552
+keep &lt;- samples %&gt;% 
+  filter(GSE == &quot;GSE22552&quot;) %&gt;% 
+  filter(group1 != &quot;&quot;) %&gt;% 
+  .$name 
+combined.GSE22552 &lt;- data.frame(combined) %&gt;% 
+  dplyr::select(one_of(keep))
+# GSE24759
+keep &lt;- samples %&gt;% 
+  filter(GSE == &quot;GSE24759&quot;) %&gt;% 
+  filter(group1 != &quot;&quot;) %&gt;% 
+  .$name 
+combined.GSE24759 &lt;- data.frame(combined) %&gt;% 
+  dplyr::select(one_of(keep))
+# GSE41599
+keep &lt;- samples %&gt;% 
+  filter(GSE == &quot;GSE41599&quot;) %&gt;% 
+  filter(group1 != &quot;&quot;) %&gt;% 
+  .$name 
+combined.GSE41599 &lt;- data.frame(combined) %&gt;% 
+  dplyr::select(one_of(keep))
+# GSE41817
+keep &lt;- samples %&gt;% 
+  filter(GSE == &quot;GSE41817&quot;) %&gt;% 
+  filter(group1 != &quot;&quot;) %&gt;% 
+  .$name 
+combined.GSE41817 &lt;- data.frame(combined) %&gt;% 
+  dplyr::select(one_of(keep))
+# GSE89540
+keep &lt;- samples %&gt;% 
+  filter(GSE == &quot;GSE89540&quot;) %&gt;% 
+  filter(group1 != &quot;&quot;) %&gt;% 
+  .$name 
+combined.GSE89540 &lt;- data.frame(combined) %&gt;% 
+  dplyr::select(one_of(keep))</code></pre>
+<p>Done with pre-processing. Save both normalized and normalized + batch normalized data. Un-log for CIBERSORT.</p>
+<pre class="r"><code>saveRDS(combined,&quot;../processed/combined_SCAN.rds&quot;)
+saveRDS(combined.GSE22552,&quot;../processed/combined_SCAN_GSE22552.rds&quot;)
+saveRDS(combined.GSE24759,&quot;../processed/combined_SCAN_GSE24759.rds&quot;)
+saveRDS(combined.GSE41599,&quot;../processed/combined_SCAN_GSE41599.rds&quot;)
+saveRDS(combined.GSE41817,&quot;../processed/combined_SCAN_GSE41817.rds&quot;)
+saveRDS(combined.GSE89540,&quot;../processed/combined_SCAN_GSE89540.rds&quot;)
+saveRDS(combined.bn,&quot;../processed/combined_SCAN_BN.rds&quot;)
+saveRDS(combined.bn.GSE22552,&quot;../processed/combined_SCAN_BN_GSE22552.rds&quot;)
+saveRDS(combined.bn.GSE24759,&quot;../processed/combined_SCAN_BN_GSE24759.rds&quot;)
+saveRDS(combined.bn.GSE89540,&quot;../processed/combined_SCAN_BN_GSE89540.rds&quot;)</code></pre>
+<p>Identify most variable genes between groups in the two reference datasets. Write signature gene sets for overlaps.</p>
+<pre class="r"><code># Functions for doing one vs all t-tests
+t.test.onevsall &lt;- function(df,group) {
+  df.ret &lt;- df %&gt;% 
+    mutate(group3 = ifelse(group1 == group,1,0)) %&gt;%
+    group_by(Var1) %&gt;%
+    do({model = t.test(value ~ group3, data = .);
+    data.frame(pval = model$p.value)}) %&gt;%
+    arrange(pval) %&gt;%
+    head(100)
+  return(df.ret)
+}
+t.test.multi &lt;- function(df) {
+  ret &lt;- list()
+  for (i in levels(factor(df$group1))) {
+    ret[[i]]&lt;- t.test.onevsall(df,i)
+  }
+  return(ret)
+}
+# GSE22552
+combined.bn.GSE22552.melt &lt;- melt(as.matrix(combined.bn.GSE22552))
+combined.bn.GSE22552.melt &lt;- list(combined.bn.GSE22552.melt, samples) %&gt;%
+  Reduce(function(dtf1,dtf2) left_join(dtf1,dtf2,by=c(&quot;Var2&quot;=&quot;name&quot;)), .)
+combined.bn.GSE22552.aov &lt;- combined.bn.GSE22552.melt %&gt;% 
+  group_by(Var1) %&gt;% 
+  do({model = summary(lm(value ~ group1, data = .));
+    data.frame(fval = model$fstatistic[1])}) %&gt;%
+  arrange(desc(fval))
+combined.bn.GSE22552.t &lt;- t.test.multi(combined.bn.GSE22552.melt)
+combined.bn.GSE22552.t.vect &lt;- as.vector(unique(bind_rows(combined.bn.GSE22552.t)$Var1))
+# GSE24759
+combined.bn.GSE24759.melt &lt;- melt(as.matrix(combined.bn.GSE24759))
+combined.bn.GSE24759.melt &lt;- list(combined.bn.GSE24759.melt, samples) %&gt;%
+  Reduce(function(dtf1,dtf2) left_join(dtf1,dtf2,by=c(&quot;Var2&quot;=&quot;name&quot;)), .)
+combined.bn.GSE24759.aov &lt;- combined.bn.GSE24759.melt %&gt;% 
+  group_by(Var1) %&gt;% 
+  do({model = summary(lm(value ~ group1, data = .));
+  data.frame(fval = model$fstatistic[1])}) %&gt;%
+  arrange(desc(fval))
+combined.bn.GSE24759.t &lt;- t.test.multi(combined.bn.GSE24759.melt)
+combined.bn.GSE24759.t.vect &lt;- as.vector(unique(bind_rows(combined.bn.GSE24759.t)$Var1))
+
+# Find overlaps
+#include &lt;- table(c(as.vector(combined.bn.GSE22552.aov$Var1),as.vector(combined.bn.GSE24759.aov$Var1)))
+#include &lt;- names(include[include &gt; 1])
+#include &lt;- unique(c(include,as.vector(head(combined.bn.GSE22552.aov$Var1,100)),as.vector(head(combined.bn.GSE24759.aov$Var1,100))))
+# Create and write GSE22552 signature matrix
+combined.bn.GSE22552.out &lt;- combined.bn.GSE22552.melt %&gt;%
+  filter(Var1 %in% combined.bn.GSE22552.t.vect) %&gt;%
+  group_by(group1,Var1) %&gt;%
+  summarize(mean = mean(value)) %&gt;%
+  spread(group1,mean)
+write.table(combined.bn.GSE22552.out,&quot;../processed/combined_SCAN_BN_SIG_GSE22552.txt&quot;,quote=F,sep=&quot;\t&quot;,row.names=F)
+# Create and write GSE24759 signature matrix
+combined.bn.GSE24759.out &lt;- combined.bn.GSE24759.melt %&gt;%
+  filter(Var1 %in% combined.bn.GSE24759.t.vect) %&gt;%
+  group_by(group1,Var1) %&gt;%
+  summarize(mean = mean(value)) %&gt;%
+  spread(group1,mean)
+write.table(combined.bn.GSE24759.out,&quot;../processed/combined_SCAN_BN_SIG_GSE24759.txt&quot;,quote=F,sep=&quot;\t&quot;,row.names=F)</code></pre>
 
 
 

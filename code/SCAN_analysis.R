@@ -12,6 +12,8 @@ library(SCAN.UPC)
 library(dplyr)
 library(annotate)
 library(sva)
+library(reshape2)
+library(tidyr)
 
 #' Read in data for each experiment on GEO and save as RDS object so we only have to do this once
 #+ cache = TRUE, message=FALSE, warning=FALSE, echo = TRUE, eval = FALSE
@@ -99,7 +101,7 @@ exprs.GSE89540 <- exprs.GSE89540 %>%
 
 #' Merge datasets together by gene name and convert from GSM to human interpretable sample names
 #+ cache = FALSE, message=FALSE, warning=FALSE, echo = TRUE, eval = TRUE
-combined <- list(exprs.GSE22552, exprs.GSE24759, exprs.GSE34268, exprs.GSE41599, exprs.GSE41817, exprs.GSE89540) %>%
+combined <- list(exprs.GSE22552, exprs.GSE24759, exprs.GSE41599, exprs.GSE41817, exprs.GSE89540) %>%
   Reduce(function(dtf1,dtf2) inner_join(dtf1,dtf2,by="gene"), .)
 names(combined) <- gsub(".CEL.gz","",gsub("_.*","",names(combined)))
 samples <- read.table("../data/Samples.txt",sep="\t",stringsAsFactors=F)
@@ -190,52 +192,74 @@ combined.GSE89540 <- data.frame(combined) %>%
 
 #' Done with pre-processing. Save both normalized and normalized + batch normalized data. Un-log for CIBERSORT.
 #+ cache = FALSE, message=FALSE, warning=FALSE, echo = TRUE, eval = TRUE
-saveRDS(2^combined,"../processed/combined_SCAN.rds")
-write.table(2^combined.GSE22552,"../processed/combined_SCAN_GSE22552.txt",quote=F,sep="\t",col.names=NA)
-write.table(2^combined.GSE24759,"../processed/combined_SCAN_GSE24759.txt",quote=F,sep="\t",col.names=NA)
-write.table(2^combined.GSE41599,"../processed/combined_SCAN_GSE41599.txt",quote=F,sep="\t",col.names=NA)
-write.table(2^combined.GSE41817,"../processed/combined_SCAN_GSE41817.txt",quote=F,sep="\t",col.names=NA)
-write.table(2^combined.GSE89540,"../processed/combined_SCAN_GSE89540.txt",quote=F,sep="\t",col.names=NA)
-saveRDS(2^combined.bn,"../processed/combined_SCAN_BN.rds")
-write.table(2^combined.bn.GSE22552,"../processed/combined_SCAN_BN_GSE22552.txt",quote=F,sep="\t",col.names=NA)
-write.table(2^combined.bn.GSE24759,"../processed/combined_SCAN_BN_GSE24759.txt",quote=F,sep="\t",col.names=NA)
-write.table(2^combined.bn.GSE89540,"../processed/combined_SCAN_BN_GSE89540.txt",quote=F,sep="\t",col.names=NA)
+saveRDS(combined,"../processed/combined_SCAN.rds")
+saveRDS(combined.GSE22552,"../processed/combined_SCAN_GSE22552.rds")
+saveRDS(combined.GSE24759,"../processed/combined_SCAN_GSE24759.rds")
+saveRDS(combined.GSE41599,"../processed/combined_SCAN_GSE41599.rds")
+saveRDS(combined.GSE41817,"../processed/combined_SCAN_GSE41817.rds")
+saveRDS(combined.GSE89540,"../processed/combined_SCAN_GSE89540.rds")
+saveRDS(combined.bn,"../processed/combined_SCAN_BN.rds")
+saveRDS(combined.bn.GSE22552,"../processed/combined_SCAN_BN_GSE22552.rds")
+saveRDS(combined.bn.GSE24759,"../processed/combined_SCAN_BN_GSE24759.rds")
+saveRDS(combined.bn.GSE89540,"../processed/combined_SCAN_BN_GSE89540.rds")
 
 #' Identify most variable genes between groups in the two reference datasets. Write signature gene sets for overlaps.
 #+ cache = FALSE, message=FALSE, warning=FALSE, echo = TRUE, eval = TRUE
+# Functions for doing one vs all t-tests
+t.test.onevsall <- function(df,group) {
+  df.ret <- df %>% 
+    mutate(group3 = ifelse(group1 == group,1,0)) %>%
+    group_by(Var1) %>%
+    do({model = t.test(value ~ group3, data = .);
+    data.frame(pval = model$p.value)}) %>%
+    arrange(pval) %>%
+    head(100)
+  return(df.ret)
+}
+t.test.multi <- function(df) {
+  ret <- list()
+  for (i in levels(factor(df$group1))) {
+    ret[[i]]<- t.test.onevsall(df,i)
+  }
+  return(ret)
+}
 # GSE22552
-combined.bn.GSE22552.melt <- melt(as.matrix(2^combined.bn.GSE22552))
+combined.bn.GSE22552.melt <- melt(as.matrix(combined.bn.GSE22552))
 combined.bn.GSE22552.melt <- list(combined.bn.GSE22552.melt, samples) %>%
   Reduce(function(dtf1,dtf2) left_join(dtf1,dtf2,by=c("Var2"="name")), .)
 combined.bn.GSE22552.aov <- combined.bn.GSE22552.melt %>% 
   group_by(Var1) %>% 
   do({model = summary(lm(value ~ group1, data = .));
     data.frame(fval = model$fstatistic[1])}) %>%
-  arrange(desc(fval)) %>%
-  head(500)
+  arrange(desc(fval))
+combined.bn.GSE22552.t <- t.test.multi(combined.bn.GSE22552.melt)
+combined.bn.GSE22552.t.vect <- as.vector(unique(bind_rows(combined.bn.GSE22552.t)$Var1))
 # GSE24759
-combined.bn.GSE24759.melt <- melt(as.matrix(2^combined.bn.GSE24759))
+combined.bn.GSE24759.melt <- melt(as.matrix(combined.bn.GSE24759))
 combined.bn.GSE24759.melt <- list(combined.bn.GSE24759.melt, samples) %>%
   Reduce(function(dtf1,dtf2) left_join(dtf1,dtf2,by=c("Var2"="name")), .)
 combined.bn.GSE24759.aov <- combined.bn.GSE24759.melt %>% 
   group_by(Var1) %>% 
   do({model = summary(lm(value ~ group1, data = .));
   data.frame(fval = model$fstatistic[1])}) %>%
-  arrange(desc(fval)) %>%
-  head(500)2^
+  arrange(desc(fval))
+combined.bn.GSE24759.t <- t.test.multi(combined.bn.GSE24759.melt)
+combined.bn.GSE24759.t.vect <- as.vector(unique(bind_rows(combined.bn.GSE24759.t)$Var1))
+
 # Find overlaps
-include <- table(c(as.vector(combined.bn.GSE22552.aov$Var1),as.vector(combined.bn.GSE24759.aov$Var1)))
-include <- names(include[include > 1])
+#include <- table(c(as.vector(combined.bn.GSE22552.aov$Var1),as.vector(combined.bn.GSE24759.aov$Var1)))
+#include <- names(include[include > 1])
+#include <- unique(c(include,as.vector(head(combined.bn.GSE22552.aov$Var1,100)),as.vector(head(combined.bn.GSE24759.aov$Var1,100))))
 # Create and write GSE22552 signature matrix
 combined.bn.GSE22552.out <- combined.bn.GSE22552.melt %>%
-  filter(Var1 %in% include) %>%
+  filter(Var1 %in% combined.bn.GSE22552.t.vect) %>%
   group_by(group1,Var1) %>%
   summarize(mean = mean(value)) %>%
   spread(group1,mean)
 write.table(combined.bn.GSE22552.out,"../processed/combined_SCAN_BN_SIG_GSE22552.txt",quote=F,sep="\t",row.names=F)
 # Create and write GSE24759 signature matrix
 combined.bn.GSE24759.out <- combined.bn.GSE24759.melt %>%
-  filter(Var1 %in% include) %>%
+  filter(Var1 %in% combined.bn.GSE24759.t.vect) %>%
   group_by(group1,Var1) %>%
   summarize(mean = mean(value)) %>%
   spread(group1,mean)
