@@ -24,3 +24,6 @@ dplyr
 AnnotationDbi
 XML
 annotate
+reshape2
+tidyr
+limma

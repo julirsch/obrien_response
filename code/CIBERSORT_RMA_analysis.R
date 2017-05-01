@@ -82,7 +82,6 @@ CIBERSORT.GSE22552.sum <- CIBERSORT.GSE22552.melt %>%
 CIBERSORT.GSE22552.plot <- CIBERSORT.GSE22552.sum %>% 
   group_by(group1) %>%
   mutate(pos = cumsum(percent)) %>%
-  ungroup() %>%
   mutate(lower = pos - sem(percent), upper = pos + sem(percent))
 ggplot(CIBERSORT.GSE22552.plot, aes(x=group1, y=percent, fill=variable)) +
   geom_bar(stat="identity") +
@@ -99,7 +98,7 @@ CIBERSORT.GSE22552.temp <- CIBERSORT.GSE22552 %>%
   dplyr::select(CFU_E:PRO_E,group1)
 CIBERSORT.GSE22552.melt <- melt(CIBERSORT.GSE22552.temp)
 CIBERSORT.GSE22552.melt$variable <- factor(CIBERSORT.GSE22552.melt$variable, levels= rev(c("CFU_E","PRO_E","INT_E","LATE_E")), ordered=T)
-CIBERSORT.GSE22552.melt$group1 <- factor(CIBERSORT.GSE22552.melt$group1, levels= c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71neg_GlyApos","CD34neg_CD71lo_GlyApos"), ordered=T)
+CIBERSORT.GSE22552.melt$group1 <- factor(CIBERSORT.GSE22552.melt$group1, levels= c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71lo_GlyApos","CD34neg_CD71neg_GlyApos"), ordered=T)
 CIBERSORT.GSE22552.sum <- CIBERSORT.GSE22552.melt %>% 
   group_by(group1,variable) %>%
   summarize(percent = mean(value)) %>%
@@ -107,7 +106,6 @@ CIBERSORT.GSE22552.sum <- CIBERSORT.GSE22552.melt %>%
 CIBERSORT.GSE22552.plot <- CIBERSORT.GSE22552.sum %>% 
   group_by(group1) %>%
   mutate(pos = cumsum(percent)) %>%
-  ungroup() %>%
   mutate(lower = pos - sem(percent), upper = pos + sem(percent))
 ggplot(CIBERSORT.GSE22552.plot, aes(x=group1, y=percent, fill=variable)) +
   geom_bar(stat="identity") +
@@ -123,8 +121,8 @@ CIBERSORT.GSE24759.temp <- CIBERSORT.GSE24759 %>%
   filter(GSE == "GSE24759") %>%
   dplyr::select(CD34neg_CD71lo_GlyApos:CD34pos_CD71pos_GlyAneg,group1)
 CIBERSORT.GSE24759.melt <- melt(CIBERSORT.GSE24759.temp)
-CIBERSORT.GSE24759.melt$variable <- factor(CIBERSORT.GSE24759.melt$variable, levels= rev(c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71neg_GlyApos","CD34neg_CD71lo_GlyApos")), ordered=T)
-CIBERSORT.GSE24759.melt$group1 <- factor(CIBERSORT.GSE24759.melt$group1, levels= c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71neg_GlyApos","CD34neg_CD71lo_GlyApos"), ordered=T)
+CIBERSORT.GSE24759.melt$variable <- factor(CIBERSORT.GSE24759.melt$variable, levels= rev(c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71lo_GlyApos","CD34neg_CD71neg_GlyApos")), ordered=T)
+CIBERSORT.GSE24759.melt$group1 <- factor(CIBERSORT.GSE24759.melt$group1, levels= c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71lo_GlyApos","CD34neg_CD71neg_GlyApos"), ordered=T)
 CIBERSORT.GSE24759.sum <- CIBERSORT.GSE24759.melt %>% 
   group_by(group1,variable) %>%
   summarize(percent = mean(value)) %>%
@@ -132,7 +130,6 @@ CIBERSORT.GSE24759.sum <- CIBERSORT.GSE24759.melt %>%
 CIBERSORT.GSE24759.plot <- CIBERSORT.GSE24759.sum %>% 
   group_by(group1) %>%
   mutate(pos = cumsum(percent)) %>%
-  ungroup() %>%
   mutate(lower = pos - sem(percent), upper = pos + sem(percent))
 ggplot(CIBERSORT.GSE24759.plot, aes(x=group1, y=percent, fill=variable)) +
   geom_bar(stat="identity") +
@@ -148,7 +145,7 @@ CIBERSORT.GSE24759.temp <- CIBERSORT.GSE24759 %>%
   filter(GSE == "GSE22552") %>%
   dplyr::select(CD34neg_CD71lo_GlyApos:CD34pos_CD71pos_GlyAneg,group1)
 CIBERSORT.GSE24759.melt <- melt(CIBERSORT.GSE24759.temp)
-CIBERSORT.GSE24759.melt$variable <- factor(CIBERSORT.GSE24759.melt$variable, levels= rev(c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71neg_GlyApos","CD34neg_CD71lo_GlyApos")), ordered=T)
+CIBERSORT.GSE24759.melt$variable <- factor(CIBERSORT.GSE24759.melt$variable, levels= rev(c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71lo_GlyApos","CD34neg_CD71neg_GlyApos")), ordered=T)
 CIBERSORT.GSE24759.melt$group1 <- factor(CIBERSORT.GSE24759.melt$group1, levels= c("CFU_E","PRO_E","INT_E","LATE_E"), ordered=T)
 CIBERSORT.GSE24759.sum <- CIBERSORT.GSE24759.melt %>% 
   group_by(group1,variable) %>%
@@ -157,7 +154,6 @@ CIBERSORT.GSE24759.sum <- CIBERSORT.GSE24759.melt %>%
 CIBERSORT.GSE24759.plot <- CIBERSORT.GSE24759.sum %>% 
   group_by(group1) %>%
   mutate(pos = cumsum(percent)) %>%
-  ungroup() %>%
   mutate(lower = pos - sem(percent), upper = pos + sem(percent))
 ggplot(CIBERSORT.GSE24759.plot, aes(x=group1, y=percent, fill=variable)) +
   geom_bar(stat="identity") +
@@ -181,7 +177,6 @@ CIBERSORT.GSE22552.sum <- CIBERSORT.GSE22552.melt %>%
 CIBERSORT.GSE22552.plot <- CIBERSORT.GSE22552.sum %>% 
   group_by(group2) %>%
   mutate(pos = cumsum(percent)) %>%
-  ungroup() %>%
   mutate(lower = pos - sem(percent), upper = pos + sem(percent))
 ggplot(CIBERSORT.GSE22552.plot, aes(x=group2, y=percent, fill=variable)) +
   geom_bar(stat="identity") +
@@ -205,7 +200,6 @@ CIBERSORT.GSE22552.sum <- CIBERSORT.GSE22552.melt %>%
 CIBERSORT.GSE22552.plot <- CIBERSORT.GSE22552.sum %>% 
   group_by(group1) %>%
   mutate(pos = cumsum(percent)) %>%
-  ungroup() %>%
   mutate(lower = pos - sem(percent), upper = pos + sem(percent))
 ggplot(CIBERSORT.GSE22552.plot, aes(x=group1, y=percent, fill=variable)) +
   geom_bar(stat="identity") +
@@ -229,7 +223,6 @@ CIBERSORT.GSE22552.sum <- CIBERSORT.GSE22552.melt %>%
 CIBERSORT.GSE22552.plot <- CIBERSORT.GSE22552.sum %>% 
   group_by(group1) %>%
   mutate(pos = cumsum(percent)) %>%
-  ungroup() %>%
   mutate(lower = pos - sem(percent), upper = pos + sem(percent))
 ggplot(CIBERSORT.GSE22552.plot, aes(x=group1, y=percent, fill=variable)) +
   geom_bar(stat="identity") +
@@ -245,7 +238,7 @@ CIBERSORT.GSE24759.temp <- CIBERSORT.GSE24759 %>%
   filter(group1 == "Control") %>%
   dplyr::select(CD34neg_CD71lo_GlyApos:CD34pos_CD71pos_GlyAneg,group2)
 CIBERSORT.GSE24759.melt <- melt(CIBERSORT.GSE24759.temp)
-CIBERSORT.GSE24759.melt$variable <- factor(CIBERSORT.GSE24759.melt$variable, levels= rev(c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71neg_GlyApos","CD34neg_CD71lo_GlyApos")), ordered=T)
+CIBERSORT.GSE24759.melt$variable <- factor(CIBERSORT.GSE24759.melt$variable, levels= rev(c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71lo_GlyApos","CD34neg_CD71neg_GlyApos")), ordered=T)
 CIBERSORT.GSE24759.sum <- CIBERSORT.GSE24759.melt %>% 
   group_by(group2,variable) %>%
   summarize(percent = mean(value)) %>%
@@ -253,7 +246,6 @@ CIBERSORT.GSE24759.sum <- CIBERSORT.GSE24759.melt %>%
 CIBERSORT.GSE24759.plot <- CIBERSORT.GSE24759.sum %>% 
   group_by(group2) %>%
   mutate(pos = cumsum(percent)) %>%
-  ungroup() %>%
   mutate(lower = pos - sem(percent), upper = pos + sem(percent))
 ggplot(CIBERSORT.GSE24759.plot, aes(x=group2, y=percent, fill=variable)) +
   geom_bar(stat="identity") +
@@ -269,7 +261,7 @@ CIBERSORT.GSE24759.temp <- CIBERSORT.GSE24759 %>%
   filter(group2 == "44") %>%
   dplyr::select(CD34neg_CD71lo_GlyApos:CD34pos_CD71pos_GlyAneg,group1)
 CIBERSORT.GSE24759.melt <- melt(CIBERSORT.GSE24759.temp)
-CIBERSORT.GSE24759.melt$variable <- factor(CIBERSORT.GSE24759.melt$variable, levels= rev(c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71neg_GlyApos","CD34neg_CD71lo_GlyApos")), ordered=T)
+CIBERSORT.GSE24759.melt$variable <- factor(CIBERSORT.GSE24759.melt$variable, levels= rev(c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71lo_GlyApos","CD34neg_CD71neg_GlyApos")), ordered=T)
 CIBERSORT.GSE24759.sum <- CIBERSORT.GSE24759.melt %>% 
   group_by(group1,variable) %>%
   summarize(percent = mean(value)) %>%
@@ -277,7 +269,6 @@ CIBERSORT.GSE24759.sum <- CIBERSORT.GSE24759.melt %>%
 CIBERSORT.GSE24759.plot <- CIBERSORT.GSE24759.sum %>% 
   group_by(group1) %>%
   mutate(pos = cumsum(percent)) %>%
-  ungroup() %>%
   mutate(lower = pos - sem(percent), upper = pos + sem(percent))
 ggplot(CIBERSORT.GSE24759.plot, aes(x=group1, y=percent, fill=variable)) +
   geom_bar(stat="identity") +
@@ -293,7 +284,7 @@ CIBERSORT.GSE24759.temp <- CIBERSORT.GSE24759 %>%
   filter(group2 == "235") %>%
   dplyr::select(CD34neg_CD71lo_GlyApos:CD34pos_CD71pos_GlyAneg,group1)
 CIBERSORT.GSE24759.melt <- melt(CIBERSORT.GSE24759.temp)
-CIBERSORT.GSE24759.melt$variable <- factor(CIBERSORT.GSE24759.melt$variable, levels= rev(c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71neg_GlyApos","CD34neg_CD71lo_GlyApos")), ordered=T)
+CIBERSORT.GSE24759.melt$variable <- factor(CIBERSORT.GSE24759.melt$variable, levels= rev(c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71lo_GlyApos","CD34neg_CD71neg_GlyApos")), ordered=T)
 CIBERSORT.GSE24759.sum <- CIBERSORT.GSE24759.melt %>% 
   group_by(group1,variable) %>%
   summarize(percent = mean(value)) %>%
@@ -301,7 +292,6 @@ CIBERSORT.GSE24759.sum <- CIBERSORT.GSE24759.melt %>%
 CIBERSORT.GSE24759.plot <- CIBERSORT.GSE24759.sum %>% 
   group_by(group1) %>%
   mutate(pos = cumsum(percent)) %>%
-  ungroup() %>%
   mutate(lower = pos - sem(percent), upper = pos + sem(percent))
 ggplot(CIBERSORT.GSE24759.plot, aes(x=group1, y=percent, fill=variable)) +
   geom_bar(stat="identity") +
@@ -310,4 +300,12 @@ ggplot(CIBERSORT.GSE24759.plot, aes(x=group1, y=percent, fill=variable)) +
   theme_bw() +
   xlab("") + 
   ylab ("")
+
+#' Save deconvolved mixtures of O'Brien et al. CD235a- DBA genotype mixtures using GSE22552 cell types for synthetic normals.
+#+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE
+CIBERSORT.GSE22552.temp <- CIBERSORT.GSE22552 %>%
+  filter(group2 == "44") %>%
+  dplyr::select(CFU_E:PRO_E,group1,Row.names)
+saveRDS(CIBERSORT.GSE22552.temp,"../processed/CIBERSORT.GSE22552.mixture.rds")
+
 

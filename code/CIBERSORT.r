@@ -9,7 +9,7 @@ library(e1071)
 
 getMSE <- function(sample, sigMat, nu_ks = seq(0.1, 0.9, 0.05)){
   mses <- sapply(nu_ks, function(k){
-    svr_model <- svm(sigMat, sample, sigMatscale = FALSE, kernel = "linear", type = "nu-regression", nu = k)
+    svr_model <- svm(sigMat, sample, scale = FALSE, kernel = "linear", type = "nu-regression", nu = k)
     predictedm <- predict(svr_model, sigMat)
     error <- sample - predictedm
     mean(error^2)
@@ -28,7 +28,7 @@ modelSample <- function(idx, Y, sigMat){
   best_k <- as.numeric(names(which(min(mses) == mses)))
   
   # Run model for best k; get coefficients
-  tunedModel <- svm(sigMat, Y[,idx,drop = FALSE], sigMatscale = FALSE, kernel = "linear", type = "nu-regression", nu = best_k)
+  tunedModel <- svm(sigMat, Y[,idx,drop = FALSE], scale = FALSE, kernel = "linear", type = "nu-regression", nu = best_k)
   
   # Estimate coefficients; remove negative values; normalize contributions
   coefTuned <- t(tunedModel$coefs) %*% tunedModel$SV

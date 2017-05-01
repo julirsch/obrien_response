@@ -14,6 +14,7 @@ library(annotate)
 library(sva)
 library(reshape2)
 library(tidyr)
+library(limma)
 
 #' Read in data for each experiment on GEO and save as RDS object so we only have to do this once
 #+ cache = TRUE, message=FALSE, warning=FALSE, echo = TRUE, eval = FALSE
@@ -21,8 +22,6 @@ SCAN.GSE22552 <- SCAN("../data/GSE22552_RAW/*")
 saveRDS(SCAN.GSE22552,"../processed/SCAN.GSE22552.rds")
 SCAN.GSE24759 <- SCAN("../data/GSE24759_RAW/*", annotationPackageName="pd.ht.hg.u133a")
 saveRDS(SCAN.GSE24759,"../processed/SCAN.GSE24759.rds")
-SCAN.GSE34268 <- SCAN("../data/GSE34268_RAW/*")
-saveRDS(SCAN.GSE41599,"../processed/SCAN.GSE41599.rds")
 SCAN.GSE41817 <- SCAN("../data/GSE41817_RAW/*")
 saveRDS(SCAN.GSE41817,"../processed/SCAN.GSE41817.rds")
 SCAN.GSE89540 <- SCAN("../data/GSE89540_RAW/*")
@@ -32,7 +31,6 @@ saveRDS(SCAN.GSE89540,"../processed/SCAN.GSE89540.rds")
 #+ cache = FALSE, message=FALSE, warning=FALSE, echo = FALSE, eval = TRUE
 SCAN.GSE22552 <- readRDS("../processed/SCAN.GSE22552.rds")
 SCAN.GSE24759 <- readRDS("../processed/SCAN.GSE24759.rds")
-SCAN.GSE41599 <- readRDS("../processed/SCAN.GSE41599.rds")
 SCAN.GSE41817 <- readRDS("../processed/SCAN.GSE41817.rds")
 SCAN.GSE89540 <- readRDS("../processed/SCAN.GSE89540.rds")
 
@@ -59,18 +57,6 @@ fData(SCAN.GSE24759) <- data.frame(ID=ID,Symbol=Symbol)
 exprs.GSE24759 <- as.data.frame(exprs(SCAN.GSE24759))
 exprs.GSE24759$gene <- as.vector(fData(SCAN.GSE24759)$Symbol)
 exprs.GSE24759 <- exprs.GSE24759 %>%
-  filter(gene != "<NA>") %>%
-  group_by(gene) %>%
-  summarise_each(funs(max))
-# GSE41599
-library(hgu133a.db)
-annotation(SCAN.GSE41599) <- "hgu133a.db"
-ID <- featureNames(SCAN.GSE41599)
-Symbol <- getSYMBOL(ID,"hgu133a.db")
-fData(SCAN.GSE41599) <- data.frame(ID=ID,Symbol=Symbol)
-exprs.GSE41599 <- as.data.frame(exprs(SCAN.GSE41599))
-exprs.GSE41599$gene <- as.vector(fData(SCAN.GSE41599)$Symbol)
-exprs.GSE41599 <- exprs.GSE41599 %>%
   filter(gene != "<NA>") %>%
   group_by(gene) %>%
   summarise_each(funs(max))
@@ -101,7 +87,7 @@ exprs.GSE89540 <- exprs.GSE89540 %>%
 
 #' Merge datasets together by gene name and convert from GSM to human interpretable sample names
 #+ cache = FALSE, message=FALSE, warning=FALSE, echo = TRUE, eval = TRUE
-combined <- list(exprs.GSE22552, exprs.GSE24759, exprs.GSE41599, exprs.GSE41817, exprs.GSE89540) %>%
+combined <- list(exprs.GSE22552, exprs.GSE24759, exprs.GSE41817, exprs.GSE89540) %>%
   Reduce(function(dtf1,dtf2) inner_join(dtf1,dtf2,by="gene"), .)
 names(combined) <- gsub(".CEL.gz","",gsub("_.*","",names(combined)))
 samples <- read.table("../data/Samples.txt",sep="\t",stringsAsFactors=F)
@@ -116,7 +102,7 @@ combined <- combined[,-1]
 combined.t <- data.frame(t(combined))
 names(combined.t) <- row.names(combined)
 
-#' Batch normalize! Can choose model with only intercept or include covariate for a rough sorted "stage". Really should only include studies with multiple stages (e.g. two references and O'Brien et al) otherwise completely confounded.
+#' Batch normalize! Can choose model with only intercept or include covariate for a rough sorted "stage". Really should only include studies with multiple stages (e.g. two references and O'Brien et al.) otherwise completely confounded.
 #+ cache = FALSE, message=FALSE, warning=FALSE, echo = TRUE, eval = TRUE
 keep <- samples %>% 
   filter(GSE %in% c("GSE22552", "GSE24759", "GSE89540")) %>% 
@@ -168,13 +154,6 @@ keep <- samples %>%
   .$name 
 combined.GSE24759 <- data.frame(combined) %>% 
   dplyr::select(one_of(keep))
-# GSE41599
-keep <- samples %>% 
-  filter(GSE == "GSE41599") %>% 
-  filter(group1 != "") %>% 
-  .$name 
-combined.GSE41599 <- data.frame(combined) %>% 
-  dplyr::select(one_of(keep))
 # GSE41817
 keep <- samples %>% 
   filter(GSE == "GSE41817") %>% 
@@ -190,12 +169,11 @@ keep <- samples %>%
 combined.GSE89540 <- data.frame(combined) %>% 
   dplyr::select(one_of(keep))
 
-#' Done with pre-processing. Save both normalized and normalized + batch normalized data. Un-log for CIBERSORT.
+#' Done with pre-processing. Save both normalized and normalized + batch normalized data.
 #+ cache = FALSE, message=FALSE, warning=FALSE, echo = TRUE, eval = TRUE
 saveRDS(combined,"../processed/combined_SCAN.rds")
 saveRDS(combined.GSE22552,"../processed/combined_SCAN_GSE22552.rds")
 saveRDS(combined.GSE24759,"../processed/combined_SCAN_GSE24759.rds")
-saveRDS(combined.GSE41599,"../processed/combined_SCAN_GSE41599.rds")
 saveRDS(combined.GSE41817,"../processed/combined_SCAN_GSE41817.rds")
 saveRDS(combined.GSE89540,"../processed/combined_SCAN_GSE89540.rds")
 saveRDS(combined.bn,"../processed/combined_SCAN_BN.rds")
@@ -205,61 +183,77 @@ saveRDS(combined.bn.GSE89540,"../processed/combined_SCAN_BN_GSE89540.rds")
 
 #' Identify most variable genes between groups in the two reference datasets. Write signature gene sets for overlaps.
 #+ cache = FALSE, message=FALSE, warning=FALSE, echo = TRUE, eval = TRUE
-# Functions for doing one vs all t-tests
-t.test.onevsall <- function(df,group) {
-  df.ret <- df %>% 
-    mutate(group3 = ifelse(group1 == group,1,0)) %>%
-    group_by(Var1) %>%
-    do({model = t.test(value ~ group3, data = .);
-    data.frame(pval = model$p.value)}) %>%
-    arrange(pval) %>%
-    head(100)
-  return(df.ret)
-}
-t.test.multi <- function(df) {
-  ret <- list()
-  for (i in levels(factor(df$group1))) {
-    ret[[i]]<- t.test.onevsall(df,i)
-  }
-  return(ret)
-}
 # GSE22552
+# Do this for later
 combined.bn.GSE22552.melt <- melt(as.matrix(combined.bn.GSE22552))
 combined.bn.GSE22552.melt <- list(combined.bn.GSE22552.melt, samples) %>%
   Reduce(function(dtf1,dtf2) left_join(dtf1,dtf2,by=c("Var2"="name")), .)
-combined.bn.GSE22552.aov <- combined.bn.GSE22552.melt %>% 
-  group_by(Var1) %>% 
-  do({model = summary(lm(value ~ group1, data = .));
-    data.frame(fval = model$fstatistic[1])}) %>%
-  arrange(desc(fval))
-combined.bn.GSE22552.t <- t.test.multi(combined.bn.GSE22552.melt)
-combined.bn.GSE22552.t.vect <- as.vector(unique(bind_rows(combined.bn.GSE22552.t)$Var1))
+# Make one vs all comparisons for each
+groups <- samples %>%
+  filter(name %in% names(combined.bn.GSE22552)) %>%
+  .$group1 %>%
+  factor(levels=c("CFU_E","PRO_E","INT_E","LATE_E"), ordered=TRUE)
+condition <- model.matrix(~0+groups)
+colnames(condition) <- c("CFU_E","PRO_E","INT_E","LATE_E")
+cont_matrix <- makeContrasts(CFU_EvALL = CFU_E - (PRO_E+INT_E+LATE_E)/3,
+                             PRO_EvALL = PRO_E - (CFU_E+INT_E+LATE_E)/3,
+                             INT_EvALL = INT_E - (CFU_E+PRO_E+LATE_E)/3,
+                             LATE_EvALL = LATE_E - (CFU_E+PRO_E+INT_E)/3,
+                             levels = condition)
+# Convert to eSet and run limma
+v <-new("ExpressionSet", exprs=as.matrix(combined.bn.GSE22552))
+fit <- lmFit(v, condition)
+fit <- contrasts.fit(fit, cont_matrix)
+fit <- eBayes(fit)
+out <- data.frame(fit$coefficients)
+combined.bn.GSE22552.limma <- NULL
+# Calculate unsigned GSA statistics
+for (i in 1:4) {
+  out[,i] <- abs(fit$coefficients[,i] * log10(fit$p.value)[,i])
+  combined.bn.GSE22552.limma <- c(combined.bn.GSE22552.limma,row.names(head(out[order(out[,i]),],50)))
+}
+combined.bn.GSE22552.limma <- unique(combined.bn.GSE22552.limma)
 # GSE24759
+# Do this for later
 combined.bn.GSE24759.melt <- melt(as.matrix(combined.bn.GSE24759))
 combined.bn.GSE24759.melt <- list(combined.bn.GSE24759.melt, samples) %>%
   Reduce(function(dtf1,dtf2) left_join(dtf1,dtf2,by=c("Var2"="name")), .)
-combined.bn.GSE24759.aov <- combined.bn.GSE24759.melt %>% 
-  group_by(Var1) %>% 
-  do({model = summary(lm(value ~ group1, data = .));
-  data.frame(fval = model$fstatistic[1])}) %>%
-  arrange(desc(fval))
-combined.bn.GSE24759.t <- t.test.multi(combined.bn.GSE24759.melt)
-combined.bn.GSE24759.t.vect <- as.vector(unique(bind_rows(combined.bn.GSE24759.t)$Var1))
-
-# Find overlaps
-#include <- table(c(as.vector(combined.bn.GSE22552.aov$Var1),as.vector(combined.bn.GSE24759.aov$Var1)))
-#include <- names(include[include > 1])
-#include <- unique(c(include,as.vector(head(combined.bn.GSE22552.aov$Var1,100)),as.vector(head(combined.bn.GSE24759.aov$Var1,100))))
+# Make one vs all comparisons for each
+groups <- samples %>%
+  filter(name %in% names(combined.bn.GSE24759)) %>%
+  .$group1 %>%
+  factor(levels=c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71lo_GlyApos","CD34neg_CD71neg_GlyApos"), ordered=TRUE)
+condition <- model.matrix(~0+groups)
+colnames(condition) <- c("CD34pos_CD71pos_GlyAneg","CD34neg_CD71pos_GlyAneg","CD34neg_CD71pos_GlyApos","CD34neg_CD71lo_GlyApos","CD34neg_CD71neg_GlyApos")
+cont_matrix <- makeContrasts(CD34pos_CD71pos_GlyAnegvALL = CD34pos_CD71pos_GlyAneg - (CD34neg_CD71pos_GlyAneg+CD34neg_CD71pos_GlyApos+CD34neg_CD71lo_GlyApos+CD34neg_CD71neg_GlyApos)/4,
+                             CD34neg_CD71pos_GlyAnegvALL = CD34neg_CD71pos_GlyAneg - (CD34pos_CD71pos_GlyAneg+CD34neg_CD71pos_GlyApos+CD34neg_CD71lo_GlyApos+CD34neg_CD71neg_GlyApos)/4,
+                             CD34neg_CD71pos_GlyAposvALL = CD34neg_CD71pos_GlyApos - (CD34pos_CD71pos_GlyAneg+CD34neg_CD71pos_GlyAneg+CD34neg_CD71lo_GlyApos+CD34neg_CD71neg_GlyApos)/4,
+                             CD34neg_CD71lo_GlyAposvALL = CD34neg_CD71lo_GlyApos - (CD34pos_CD71pos_GlyAneg+CD34neg_CD71pos_GlyAneg+CD34neg_CD71pos_GlyApos+CD34neg_CD71neg_GlyApos)/4,
+                             CD34neg_CD71neg_GlyApos = CD34neg_CD71neg_GlyApos - (CD34pos_CD71pos_GlyAneg+CD34neg_CD71pos_GlyAneg+CD34neg_CD71pos_GlyApos+CD34neg_CD71lo_GlyApos)/4,
+                             levels = condition)
+# Convert to eSet and run limma
+v <-new("ExpressionSet", exprs=as.matrix(combined.bn.GSE24759))
+fit <- lmFit(v, condition)
+fit <- contrasts.fit(fit, cont_matrix)
+fit <- eBayes(fit)
+out <- data.frame(fit$coefficients)
+combined.bn.GSE24759.limma <- NULL
+# Calculate unsigned GSA statistics and take top 100 for each comparison
+for (i in 1:5) {
+  out[,i] <- abs(fit$coefficients[,i] * log10(fit$p.value)[,i])
+  combined.bn.GSE24759.limma <- c(combined.bn.GSE24759.limma,row.names(head(out[order(out[,i]),],40)))
+}
+combined.bn.GSE24759.limma <- unique(combined.bn.GSE24759.limma)
 # Create and write GSE22552 signature matrix
 combined.bn.GSE22552.out <- combined.bn.GSE22552.melt %>%
-  filter(Var1 %in% combined.bn.GSE22552.t.vect) %>%
+  filter(Var1 %in% combined.bn.GSE22552.limma) %>%
   group_by(group1,Var1) %>%
   summarize(mean = mean(value)) %>%
   spread(group1,mean)
 write.table(combined.bn.GSE22552.out,"../processed/combined_SCAN_BN_SIG_GSE22552.txt",quote=F,sep="\t",row.names=F)
 # Create and write GSE24759 signature matrix
 combined.bn.GSE24759.out <- combined.bn.GSE24759.melt %>%
-  filter(Var1 %in% combined.bn.GSE24759.t.vect) %>%
+  filter(Var1 %in% combined.bn.GSE24759.limma) %>%
   group_by(group1,Var1) %>%
   summarize(mean = mean(value)) %>%
   spread(group1,mean)
