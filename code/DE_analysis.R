@@ -19,10 +19,12 @@ combined.SCAN.GSE22552 <- readRDS("../processed/combined_SCAN_GSE22552.rds")
 combined.SCAN.GSE24759 <- readRDS("../processed/combined_SCAN_GSE24759.rds")
 combined.SCAN.GSE41817 <- readRDS("../processed/combined_SCAN_GSE41817.rds")
 combined.SCAN.GSE89540 <- readRDS("../processed/combined_SCAN_GSE89540.rds")
+combined.SCAN.BN.GSE89540 <- readRDS("../processed/combined_SCAN_BN_GSE89540.rds")
 combined.RMA.GSE22552 <- readRDS("../processed/combined_RMA_GSE22552.rds")
 combined.RMA.GSE24759 <- readRDS("../processed/combined_RMA_GSE24759.rds")
 combined.RMA.GSE41817 <- readRDS("../processed/combined_RMA_GSE41817.rds")
 combined.RMA.GSE89540 <- readRDS("../processed/combined_RMA_GSE89540.rds")
+combined.RMA.BN.GSE89540 <- readRDS("../processed/combined_RMA_BN_GSE89540.rds")
 samples <- read.table("../data/Samples.txt",sep="\t",stringsAsFactors=F)
 names(samples) <- c("GSM","name","GSE","stage","group1","group2")
 
@@ -166,21 +168,20 @@ combined.SCAN.GSE89540.table.DBA_GATA1vDBA["HBB",]
 
 #' Create synthetic normal and normalize O'Brien et al. expression set
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE
-combined.GSE89540 <- readRDS("../processed/combined_RMA_GSE89540.rds")
 CIBERSORT.GSE22552 <- readRDS("../processed/CIBERSORT.GSE22552.mixture.rds")
-combined.GSE89540 <- combined.GSE89540 %>%
+combined.RMA.BN.GSE89540 <- combined.RMA.BN.GSE89540 %>%
   dplyr::select(grep("44",names(.)))
-combined.RMA.GSE89540.sn <- combined.GSE89540
-CFU_E <- combined.GSE22552 %>%
+combined.RMA.GSE89540.sn <- combined.RMA.BN.GSE89540
+CFU_E <- combined.RMA.GSE22552 %>%
   dplyr::select(grep("CFU_E",names(.))) %>%
   rowMeans()
-PRO_E <- combined.GSE22552 %>%
+PRO_E <- combined.RMA.GSE22552 %>%
   dplyr::select(grep("Pro_E",names(.))) %>%
   rowMeans()
-INT_E <- combined.GSE22552 %>%
+INT_E <- combined.RMA.GSE22552 %>%
   dplyr::select(grep("Int_E",names(.))) %>%
   rowMeans()
-LATE_E <- combined.GSE22552 %>%
+LATE_E <- combined.RMA.GSE22552 %>%
   dplyr::select(grep("Late_E",names(.))) %>%
   rowMeans()
 seqto <- dim(CIBERSORT.GSE22552)[1]
@@ -191,7 +192,7 @@ for (i in seq(1, seqto, 1)) {
     CIBERSORT.GSE22552[i,"INT_E"] *  INT_E +
     CIBERSORT.GSE22552[i,"LATE_E"] * LATE_E
 }
-combined.RMA.GSE89540.sn.norm <- combined.GSE89540 - combined.GSE89540.sn
+combined.RMA.GSE89540.sn.norm <- combined.RMA.BN.GSE89540 - combined.RMA.GSE89540.sn
 
 # GSE89540 synthetic normal 
 combined.RMA.GSE89540.sn.temp <- combined.RMA.GSE89540.sn

@@ -44,7 +44,8 @@ fit <- contrasts.fit(fit, cont_matrix)
 fit <- eBayes(fit)
 out <- data.frame(fit$coefficients)
 out_table <- topTable(fit, n = 20000, sort.by="logFC", resort.by="logFC", p.value=0.05,adjust.method="fdr",lfc=2)
-GSE22552.eryth <- row.names(out_table[out_table$logFC>0,]) #row.names(head(out_table,100))
+GSE22552.eryth <- row.names(out_table[out_table$logFC>0,])
+combined.RMA.GSE22552.table.LATEvEARLY <- topTable(fit, n = 20000, sort.by="logFC", resort.by="logFC", p.value=1,adjust.method="fdr",lfc=0)
 # GSE24759 RMA
 groups <- samples %>%
   filter(name %in% names(combined.GSE24759)) %>%
@@ -60,7 +61,8 @@ fit <- lmFit(v, condition)
 fit <- contrasts.fit(fit, cont_matrix)
 fit <- eBayes(fit)
 out_table <- topTable(fit, n = 20000, sort.by="logFC", resort.by="logFC", p.value=0.05,adjust.method="fdr",lfc=2)
-GSE24759.eryth <- row.names(out_table[out_table$logFC>0,]) #row.names(head(out_table,100))
+GSE24759.eryth <- row.names(out_table[out_table$logFC>0,])
+combined.RMA.GSE24759.table.LATEvEARLY <- topTable(fit, n = 20000, sort.by="logFC", resort.by="logFC", p.value=1,adjust.method="fdr",lfc=0)
 #Read in and merge gene sets
 geneset <- read.table("../data/GeneSets.txt",header=T,sep="\t",na.strings="",stringsAsFactors=F)
 geneset.l <-lapply(geneset, function (x) x[!is.na(x)])
@@ -71,48 +73,62 @@ genesets <- append(geneset.eryth, geneset.l)
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=4, fig.align='center'
 combined.RMA.GSE41817.table.ranks <- combined.RMA.GSE41817.table$logFC
 names(combined.RMA.GSE41817.table.ranks) <- row.names(combined.RMA.GSE41817.table)
-combined.RMA.GSE41817.fgseaRes <- fgsea(genesets, combined.RMA.GSE41817.table.ranks, minSize=15, maxSize=500, nperm=1000)
+combined.RMA.GSE41817.fgseaRes <- fgsea(genesets, combined.RMA.GSE41817.table.ranks, minSize=15, maxSize=500, nperm=10000)
 plotGseaTable(genesets,combined.RMA.GSE41817.table.ranks,combined.RMA.GSE41817.fgseaRes,gseaParam=0.5)
 
 #' RMA-normalized, DBA (RP/I) vs. Control from O'Brien et al.
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=4, fig.align='center'
 combined.RMA.GSE89540.table.DBAvControl.ranks <- combined.RMA.GSE89540.table.DBAvControl$logFC
 names(combined.RMA.GSE89540.table.DBAvControl.ranks) <- row.names(combined.RMA.GSE89540.table.DBAvControl)
-combined.RMA.GSE41817.DBAvControl.fgseaRes <- fgsea(genesets, combined.RMA.GSE89540.table.DBAvControl.ranks, minSize=15, maxSize=500, nperm=1000)
-plotGseaTable(genesets,combined.RMA.GSE89540.table.DBAvControl.ranks,combined.RMA.GSE41817.DBAvControl.fgseaRes,gseaParam=0.5)
+combined.RMA.GSE89540.DBAvControl.fgseaRes <- fgsea(genesets, combined.RMA.GSE89540.table.DBAvControl.ranks, minSize=15, maxSize=500, nperm=10000)
+plotGseaTable(genesets,combined.RMA.GSE89540.table.DBAvControl.ranks,combined.RMA.GSE89540.DBAvControl.fgseaRes,gseaParam=0.5)
 
 #' RMA-normalized, DBA (GATA1) vs. Control from O'Brien et al.
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=4, fig.align='center'
 combined.RMA.GSE89540.table.DBA_GATA1vControl.ranks <- combined.RMA.GSE89540.table.DBA_GATA1vControl$logFC
 names(combined.RMA.GSE89540.table.DBA_GATA1vControl.ranks) <- row.names(combined.RMA.GSE89540.table.DBA_GATA1vControl)
-combined.RMA.GSE41817.DBA_GATA1vControl.fgseaRes <- fgsea(genesets, combined.RMA.GSE89540.table.DBA_GATA1vControl.ranks, minSize=15, maxSize=500, nperm=1000)
-plotGseaTable(genesets,combined.RMA.GSE89540.table.DBA_GATA1vControl.ranks,combined.RMA.GSE41817.DBA_GATA1vControl.fgseaRes,gseaParam=0.5)
+combined.RMA.GSE89540.DBA_GATA1vControl.fgseaRes <- fgsea(genesets, combined.RMA.GSE89540.table.DBA_GATA1vControl.ranks, minSize=15, maxSize=500, nperm=10000)
+plotGseaTable(genesets,combined.RMA.GSE89540.table.DBA_GATA1vControl.ranks,combined.RMA.GSE89540.DBA_GATA1vControl.fgseaRes,gseaParam=0.5)
 
 #' Synthetic norm of RMA-normalized, DBA (RP/I) vs. Control from O'Brien et al.
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=4, fig.align='center'
 combined.RMA.GSE89540.sn.table.DBAvControl.ranks <- combined.RMA.GSE89540.sn.table.DBAvControl$logFC
 names(combined.RMA.GSE89540.sn.table.DBAvControl.ranks) <- row.names(combined.RMA.GSE89540.sn.table.DBAvControl)
-combined.RMA.GSE41817.DBAvControl.fgseaRes <- fgsea(genesets, combined.RMA.GSE89540.sn.table.DBAvControl.ranks, minSize=15, maxSize=500, nperm=1000)
-plotGseaTable(genesets,combined.RMA.GSE89540.sn.table.DBAvControl.ranks,combined.RMA.GSE41817.DBAvControl.fgseaRes,gseaParam=0.5)
+combined.RMA.GSE89540.DBAvControl.fgseaRes <- fgsea(genesets, combined.RMA.GSE89540.sn.table.DBAvControl.ranks, minSize=15, maxSize=500, nperm=10000)
+plotGseaTable(genesets,combined.RMA.GSE89540.sn.table.DBAvControl.ranks,combined.RMA.GSE89540.DBAvControl.fgseaRes,gseaParam=0.5)
 
 #' Synethic norm of RMA-normalized, DBA (GATA1) vs. Control from O'Brien et al.
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=4, fig.align='center'
 combined.RMA.GSE89540.sn.table.DBA_GATA1vControl.ranks <- combined.RMA.GSE89540.sn.table.DBA_GATA1vControl$logFC
 names(combined.RMA.GSE89540.sn.table.DBA_GATA1vControl.ranks) <- row.names(combined.RMA.GSE89540.sn.table.DBA_GATA1vControl)
-combined.RMA.GSE41817.DBA_GATA1vControl.fgseaRes <- fgsea(genesets, combined.RMA.GSE89540.sn.table.DBA_GATA1vControl.ranks, minSize=15, maxSize=500, nperm=1000)
-plotGseaTable(genesets,combined.RMA.GSE89540.sn.table.DBA_GATA1vControl.ranks,combined.RMA.GSE41817.DBA_GATA1vControl.fgseaRes,gseaParam=0.5)
+combined.RMA.GSE89540.DBA_GATA1vControl.fgseaRes <- fgsea(genesets, combined.RMA.GSE89540.sn.table.DBA_GATA1vControl.ranks, minSize=15, maxSize=500, nperm=10000)
+plotGseaTable(genesets,combined.RMA.GSE89540.sn.table.DBA_GATA1vControl.ranks,combined.RMA.GSE89540.DBA_GATA1vControl.fgseaRes,gseaParam=0.5)
 
 #' Synthetic norm-normalization of RMA-normalized, DBA (RP/I) vs. Control from O'Brien et al.
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=4, fig.align='center'
 combined.RMA.GSE89540.sn.norm.table.DBAvControl.ranks <- combined.RMA.GSE89540.sn.norm.table.DBAvControl$logFC
 names(combined.RMA.GSE89540.sn.norm.table.DBAvControl.ranks) <- row.names(combined.RMA.GSE89540.sn.norm.table.DBAvControl)
-combined.RMA.GSE41817.DBAvControl.fgseaRes <- fgsea(genesets, combined.RMA.GSE89540.sn.norm.table.DBAvControl.ranks, minSize=15, maxSize=500, nperm=1000)
-plotGseaTable(genesets,combined.RMA.GSE89540.sn.norm.table.DBAvControl.ranks,combined.RMA.GSE41817.DBAvControl.fgseaRes,gseaParam=0.5)
+combined.RMA.GSE89540.DBAvControl.fgseaRes <- fgsea(genesets, combined.RMA.GSE89540.sn.norm.table.DBAvControl.ranks, minSize=15, maxSize=500, nperm=10000)
+plotGseaTable(genesets,combined.RMA.GSE89540.sn.norm.table.DBAvControl.ranks,combined.RMA.GSE89540.DBAvControl.fgseaRes,gseaParam=0.5)
 
 #' Synethic norm-normalization of RMA-normalized, DBA (GATA1) vs. Control from O'Brien et al.
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=4, fig.align='center'
 combined.RMA.GSE89540.sn.norm.table.DBA_GATA1vControl.ranks <- combined.RMA.GSE89540.sn.norm.table.DBA_GATA1vControl$logFC
 names(combined.RMA.GSE89540.sn.norm.table.DBA_GATA1vControl.ranks) <- row.names(combined.RMA.GSE89540.sn.norm.table.DBA_GATA1vControl)
-combined.RMA.GSE41817.DBA_GATA1vControl.fgseaRes <- fgsea(genesets, combined.RMA.GSE89540.sn.norm.table.DBA_GATA1vControl.ranks, minSize=15, maxSize=500, nperm=1000)
-plotGseaTable(genesets,combined.RMA.GSE89540.sn.norm.table.DBA_GATA1vControl.ranks,combined.RMA.GSE41817.DBA_GATA1vControl.fgseaRes,gseaParam=0.5)
+combined.RMA.GSE89540.DBA_GATA1vControl.fgseaRes <- fgsea(genesets, combined.RMA.GSE89540.sn.norm.table.DBA_GATA1vControl.ranks, minSize=15, maxSize=500, nperm=10000)
+plotGseaTable(genesets,combined.RMA.GSE89540.sn.norm.table.DBA_GATA1vControl.ranks,combined.RMA.GSE89540.DBA_GATA1vControl.fgseaRes,gseaParam=0.5)
+
+#' RMA-normalized, GSE22552 reference set
+#+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=4, fig.align='center'
+combined.RMA.GSE22552.table.LATEvEARLY.ranks <- combined.RMA.GSE22552.table.LATEvEARLY$logFC
+names(combined.RMA.GSE22552.table.LATEvEARLY.ranks) <- row.names(combined.RMA.GSE22552.table.LATEvEARLY)
+combined.RMA.GSE22552.LATEvEARLY.fgseaRes <- fgsea(genesets, combined.RMA.GSE22552.table.LATEvEARLY.ranks, minSize=15, maxSize=500, nperm=10000)
+plotGseaTable(genesets,combined.RMA.GSE22552.table.LATEvEARLY.ranks,combined.RMA.GSE22552.LATEvEARLY.fgseaRes,gseaParam=0.5)
+
+#' RMA-normalized, GSE24759 reference set
+#+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=4, fig.align='center'
+combined.RMA.GSE24759.table.LATEvEARLY.ranks <- combined.RMA.GSE24759.table.LATEvEARLY$logFC
+names(combined.RMA.GSE24759.table.LATEvEARLY.ranks) <- row.names(combined.RMA.GSE24759.table.LATEvEARLY)
+combined.RMA.GSE24759.LATEvEARLY.fgseaRes <- fgsea(genesets, combined.RMA.GSE24759.table.LATEvEARLY.ranks, minSize=15, maxSize=500, nperm=10000)
+plotGseaTable(genesets,combined.RMA.GSE24759.table.LATEvEARLY.ranks,combined.RMA.GSE24759.LATEvEARLY.fgseaRes,gseaParam=0.5)
 

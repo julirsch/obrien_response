@@ -52,8 +52,10 @@ ggplot(combined.RMA.GSE22552.melt.mean, aes(x=val, fill = group1, color = group1
   scale_fill_manual(values = jdb_palette("flame_light")[c(2,4,6,8)]) + 
   scale_color_manual(values = jdb_palette("flame_light")[c(2,4,6,8)]) +
   theme_bw()
+kruskal.test(val ~ group1,data=combined.RMA.GSE22552.melt.mean)
+
 #' GSE24759 RMA
-#+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=8, fig.height=2.5, fig.align='center', fig.cap = "Gene set expression by erythroid maturation (GSE24759)"
+#+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=10, fig.height=2.5, fig.align='center', fig.cap = "Gene set expression by erythroid maturation (GSE24759)"
 combined.RMA.GSE24759.temp <- combined.RMA.GSE24759
 combined.RMA.GSE24759.melt <- melt(as.matrix(combined.RMA.GSE24759.temp))
 combined.RMA.GSE24759.melt <- list(combined.RMA.GSE24759.melt, samples) %>%
@@ -69,6 +71,8 @@ ggplot(combined.RMA.GSE24759.melt.mean, aes(x=val, fill = group1, color = group1
   scale_fill_manual(values = jdb_palette("brewer_celsius")[c(9,7,5,3,1)]) + 
   scale_color_manual(values = jdb_palette("brewer_celsius")[c(9,7,5,3,1)]) +
   theme_bw()
+kruskal.test(val ~ group1,data=combined.RMA.GSE24759.melt.mean)
+
 #' GSE41817 RMA
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=2.5, fig.align='center', fig.cap = "Gene set expression by DBA genotype (O'Brien et al.)"
 combined.RMA.GSE41817.temp <- combined.RMA.GSE41817
@@ -82,9 +86,11 @@ combined.RMA.GSE41817.melt.mean <- combined.RMA.GSE41817.melt.mean %>%
   filter(Var1 %in% geneset1)
 ggplot(combined.RMA.GSE41817.melt.mean, aes(x=val, fill = group1, color = group1)) +
   geom_density(alpha=0.1) + 
-  scale_fill_manual(values = jdb_palette("dusk_dawn")[c(2,7)]) + 
-  scale_color_manual(values = jdb_palette("dusk_dawn")[c(2,7)]) +
+  scale_fill_manual(values = jdb_palette("Rushmore")[c(5,4)]) + 
+  scale_color_manual(values = jdb_palette("Rushmore")[c(5,4)]) +
   theme_bw()
+kruskal.test(val ~ factor(group1),data=combined.RMA.GSE41817.melt.mean)
+
 #' GSE89540 RMA
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=2.5, fig.align='center', fig.cap = "Gene set expression by DBA genotype (O'Brien et al.)"
 combined.RMA.GSE89540.temp <- combined.RMA.GSE89540 %>%
@@ -103,6 +109,7 @@ ggplot(combined.RMA.GSE89540.melt.mean, aes(x=val, fill = group1, color = group1
   scale_fill_manual(values = jdb_palette("Rushmore")[c(5,4,3)]) + 
   scale_color_manual(values = jdb_palette("Rushmore")[c(5,4,3)]) +
   theme_bw()
+kruskal.test(val ~ factor(group1),data=combined.RMA.GSE89540.melt.mean)
 
 #' GSE22552 SCAN
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=2.5, fig.align='center', fig.cap = "Gene set expression by erythroid maturation (GSE22552)"
@@ -116,13 +123,13 @@ combined.SCAN.GSE22552.melt.mean <- combined.SCAN.GSE22552.melt %>%
   summarize(val=mean(value))
 combined.SCAN.GSE22552.melt.mean <- combined.SCAN.GSE22552.melt.mean %>%
   filter(Var1 %in% geneset1)
-pdf("test.pdf",width=5,height=3)
 ggplot(combined.SCAN.GSE22552.melt.mean, aes(x=val, fill = group1, color = group1)) +
   geom_density(alpha=0.1) + 
   scale_fill_manual(values = jdb_palette("flame_light")[c(2,4,6,8)]) + 
   scale_color_manual(values = jdb_palette("flame_light")[c(2,4,6,8)]) +
   theme_bw()
-dev.off()
+kruskal.test(val ~ group1,data=combined.SCAN.GSE22552.melt.mean)
+
 #' GSE24759 SCAN
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=8, fig.height=2.5, fig.align='center', fig.cap = "Gene set expression by erythroid maturation (GSE24759)"
 combined.SCAN.GSE24759.temp <- combined.SCAN.GSE24759
@@ -140,6 +147,8 @@ ggplot(combined.SCAN.GSE24759.melt.mean, aes(x=val, fill = group1, color = group
   scale_fill_manual(values = jdb_palette("brewer_celsius")[c(9,7,5,3,1)]) + 
   scale_color_manual(values = jdb_palette("brewer_celsius")[c(9,7,5,3,1)]) +
   theme_bw()
+kruskal.test(val ~ group1,data=combined.SCAN.GSE24759.melt.mean)
+
 #' GSE41817 SCAN
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=2.5, fig.align='center', fig.cap = "Gene set expression by DBA genotype (O'Brien et al.)"
 combined.SCAN.GSE41817.temp <- combined.SCAN.GSE41817
@@ -153,9 +162,11 @@ combined.SCAN.GSE41817.melt.mean <- combined.SCAN.GSE41817.melt.mean %>%
   filter(Var1 %in% geneset1)
 ggplot(combined.SCAN.GSE41817.melt.mean, aes(x=val, fill = group1, color = group1)) +
   geom_density(alpha=0.1) + 
-  scale_fill_manual(values = jdb_palette("dusk_dawn")[c(2,7)]) + 
-  scale_color_manual(values = jdb_palette("dusk_dawn")[c(2,7)]) +
+  scale_fill_manual(values = jdb_palette("Rushmore")[c(5,4)]) + 
+  scale_color_manual(values = jdb_palette("Rushmore")[c(5,4)]) +
   theme_bw()
+kruskal.test(val ~ factor(group1),data=combined.SCAN.GSE41817.melt.mean)
+
 #' GSE89540 SCAN
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=2.5, fig.align='center', fig.cap = "Gene set expression by DBA genotype (O'Brien et al.)"
 combined.SCAN.GSE89540.temp <- combined.SCAN.GSE89540 %>%
@@ -174,6 +185,7 @@ ggplot(combined.SCAN.GSE89540.melt.mean, aes(x=val, fill = group1, color = group
   scale_fill_manual(values = jdb_palette("Rushmore")[c(5,4,3)]) + 
   scale_color_manual(values = jdb_palette("Rushmore")[c(5,4,3)]) +
   theme_bw()
+kruskal.test(val ~ factor(group1),data=combined.SCAN.GSE89540.melt.mean)
 
 #' GSE22552 RMA.BN
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=2.5, fig.align='center', fig.cap = "Gene set expression by erythroid maturation (GSE22552)"
@@ -192,6 +204,7 @@ ggplot(combined.RMA.BN.GSE22552.melt.mean, aes(x=val, fill = group1, color = gro
   scale_fill_manual(values = jdb_palette("flame_light")[c(2,4,6,8)]) + 
   scale_color_manual(values = jdb_palette("flame_light")[c(2,4,6,8)]) +
   theme_bw()
+
 #' GSE24759 RMA.BN
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=8, fig.height=2.5, fig.align='center', fig.cap = "Gene set expression by erythroid maturation (GSE24759)"
 combined.RMA.BN.GSE24759.temp <- combined.RMA.BN.GSE24759
@@ -209,6 +222,7 @@ ggplot(combined.RMA.BN.GSE24759.melt.mean, aes(x=val, fill = group1, color = gro
   scale_fill_manual(values = jdb_palette("brewer_celsius")[c(9,7,5,3,1)]) + 
   scale_color_manual(values = jdb_palette("brewer_celsius")[c(9,7,5,3,1)]) +
   theme_bw()
+
 #' GSE89540 RMA.BN
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=2.5, fig.align='center', fig.cap = "Gene set expression by DBA genotype (O'Brien et al.)"
 combined.RMA.BN.GSE89540.temp <- combined.RMA.BN.GSE89540 %>%
@@ -245,6 +259,7 @@ ggplot(combined.SCAN.BN.GSE22552.melt.mean, aes(x=val, fill = group1, color = gr
   scale_fill_manual(values = jdb_palette("flame_light")[c(2,4,6,8)]) + 
   scale_color_manual(values = jdb_palette("flame_light")[c(2,4,6,8)]) +
   theme_bw()
+
 #' GSE24759 SCAN.BN
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=8, fig.height=2.5, fig.align='center', fig.cap = "Gene set expression by erythroid maturation (GSE24759)"
 combined.SCAN.BN.GSE24759.temp <- combined.SCAN.BN.GSE24759
@@ -262,6 +277,7 @@ ggplot(combined.SCAN.BN.GSE24759.melt.mean, aes(x=val, fill = group1, color = gr
   scale_fill_manual(values = jdb_palette("brewer_celsius")[c(9,7,5,3,1)]) + 
   scale_color_manual(values = jdb_palette("brewer_celsius")[c(9,7,5,3,1)]) +
   theme_bw()
+
 #' GSE89540 SCAN.BN
 #+ cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE, eval = TRUE, fig.width=7, fig.height=2.5, fig.align='center', fig.cap = "Gene set expression by DBA genotype (O'Brien et al.)"
 combined.SCAN.BN.GSE89540.temp <- combined.SCAN.BN.GSE89540 %>%
@@ -280,5 +296,4 @@ ggplot(combined.SCAN.BN.GSE89540.melt.mean, aes(x=val, fill = group1, color = gr
   scale_fill_manual(values = jdb_palette("Rushmore")[c(5,4,3)]) + 
   scale_color_manual(values = jdb_palette("Rushmore")[c(5,4,3)]) +
   theme_bw()
-
 

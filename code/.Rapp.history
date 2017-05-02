@@ -4715,15 +4715,12 @@ gsub("_.*","",colnames(affyGeneFS.GSE24759)) %in% paste0("GSM",seq(609677,609709
 affyGeneFS.GSE24759 <- affyGeneFS.GSE24759[,gsub("_.*","",colnames(affyGeneFS.GSE24759)) %in% paste0("GSM",seq(609677,609709,1))]
 affyGeneFS.GSE24759
 protocolData(affyGeneFS.GSE24759)
-protocolData(affyGeneFS.GSE24759)
 affyGeneFS.GSE24759@protocolData@varMetadata
 affyGeneFS.GSE24759@protocolData@data
 SCAN.GSE22552 <- out
 saveRDS(SCAN.GSE22552,"../processed/SCAN.GSE22552.rds")
-saveRDS(SCAN.GSE22552,"../processed/SCAN.GSE22552.rds")
 setwd("Documents/DBA_Bodine/dba_letter/")
 saveRDS(SCAN.GSE22552,"../processed/SCAN.GSE22552.rds")
-saveRDS(SCAN.GSE22552,file="../processed/SCAN.GSE22552.rds")
 saveRDS(SCAN.GSE22552,file="../processed/SCAN.GSE22552.rds")
 setwd("scripts")
 setwd("code")

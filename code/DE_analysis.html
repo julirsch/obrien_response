@@ -11,7 +11,7 @@
 
 <meta name="author" content="Jacob C Ulirsch" />
 
-<meta name="date" content="2017-05-01" />
+<meta name="date" content="2017-05-02" />
 
 <title>Analyze GSE89540 with reference data using SCAN (gene sets)</title>
 
@@ -119,7 +119,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Analyze GSE89540 with reference data using SCAN (gene sets)</h1>
 <h4 class="author"><em>Jacob C Ulirsch</em></h4>
-<h4 class="date"><em>2017-05-01</em></h4>
+<h4 class="date"><em>2017-05-02</em></h4>
 
 </div>
 
@@ -219,6 +219,82 @@ $(document).ready(function () {
 <pre class="r"><code>combined.SCAN.GSE89540.table.DBA_GATA1vDBA[&quot;HBB&quot;,]</code></pre>
 <pre><code>##          logFC  AveExpr        t   P.Value adj.P.Val         B
 ## HBB -0.3010545 1.375869 -1.86472 0.0763522  0.982447 -4.047981</code></pre>
+<p>Create synthetic normal and normalize O’Brien et al. expression set</p>
+<p>Check for differential expression of key genes in synthetic normal and after removing synthetic normal from O’Brien et al. expression set</p>
+<pre class="r"><code>#Synthetic normal
+combined.RMA.GSE89540.sn.table.DBAvControl[&quot;ALAS2&quot;,]</code></pre>
+<pre><code>##          logFC  AveExpr        t     P.Value  adj.P.Val         B
+## ALAS2 1.417284 10.24341 2.902705 0.008663004 0.05770758 -2.476174</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.table.DBAvControl[&quot;GATA1&quot;,]</code></pre>
+<pre><code>##            logFC  AveExpr         t    P.Value adj.P.Val         B
+## GATA1 -0.1123234 9.166166 -2.393998 0.02634278 0.0836422 -3.384987</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.table.DBAvControl[&quot;HBB&quot;,]</code></pre>
+<pre><code>##          logFC  AveExpr        t   P.Value adj.P.Val         B
+## HBB 0.03936273 14.40339 1.175115 0.2534412 0.3840489 -5.100835</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.table.DBAvControl[&quot;ALAS2&quot;,]</code></pre>
+<pre><code>##          logFC  AveExpr        t     P.Value  adj.P.Val         B
+## ALAS2 1.417284 10.24341 2.902705 0.008663004 0.05770758 -2.476174</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.table.DBAvControl[&quot;GATA1&quot;,]</code></pre>
+<pre><code>##            logFC  AveExpr         t    P.Value adj.P.Val         B
+## GATA1 -0.1123234 9.166166 -2.393998 0.02634278 0.0836422 -3.384987</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.table.DBAvControl[&quot;HBB&quot;,]</code></pre>
+<pre><code>##          logFC  AveExpr        t   P.Value adj.P.Val         B
+## HBB 0.03936273 14.40339 1.175115 0.2534412 0.3840489 -5.100835</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.table.DBA_GATA1vControl[&quot;ALAS2&quot;,]</code></pre>
+<pre><code>##           logFC  AveExpr        t   P.Value adj.P.Val         B
+## ALAS2 0.1806823 10.24341 0.253984 0.8020424 0.8901072 -5.378335</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.table.DBA_GATA1vControl[&quot;GATA1&quot;,]</code></pre>
+<pre><code>##            logFC  AveExpr         t  P.Value adj.P.Val         B
+## GATA1 -0.1500157 9.166166 -2.194497 0.039895 0.5575744 -3.625563</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.table.DBA_GATA1vControl[&quot;HBB&quot;,]</code></pre>
+<pre><code>##            logFC  AveExpr          t   P.Value adj.P.Val         B
+## HBB -0.007314466 14.40339 -0.1498727 0.8823324 0.9374309 -5.395979</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.table.DBA_GATA1vDBA[&quot;ALAS2&quot;,]</code></pre>
+<pre><code>##           logFC  AveExpr         t    P.Value adj.P.Val         B
+## ALAS2 -1.236602 10.24341 -1.806776 0.08552529 0.3635934 -4.161713</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.table.DBA_GATA1vDBA[&quot;GATA1&quot;,]</code></pre>
+<pre><code>##            logFC  AveExpr          t   P.Value adj.P.Val         B
+## GATA1 -0.0376923 9.166166 -0.5731056 0.5728177 0.7711283 -5.297733</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.table.DBA_GATA1vDBA[&quot;HBB&quot;,]</code></pre>
+<pre><code>##          logFC  AveExpr          t   P.Value adj.P.Val         B
+## HBB -0.0466772 14.40339 -0.9940962 0.3317862  0.591083 -5.026388</code></pre>
+<pre class="r"><code>#Normalized
+combined.RMA.GSE89540.sn.norm.table.DBAvControl[&quot;ALAS2&quot;,]</code></pre>
+<pre><code>##             logFC   AveExpr           t   P.Value adj.P.Val         B
+## ALAS2 -0.02958282 -0.661185 -0.03202959 0.9747308 0.9900751 -5.670345</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.norm.table.DBAvControl[&quot;GATA1&quot;,]</code></pre>
+<pre><code>##           logFC    AveExpr        t    P.Value adj.P.Val         B
+## GATA1 0.5544215 -0.6197297 1.877433 0.07348117 0.4295649 -4.172982</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.norm.table.DBAvControl[&quot;HBB&quot;,]</code></pre>
+<pre><code>##         logFC   AveExpr        t   P.Value adj.P.Val         B
+## HBB 0.2711627 -3.961081 1.122357 0.2735427 0.6373178 -5.107011</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.norm.table.DBAvControl[&quot;ALAS2&quot;,]</code></pre>
+<pre><code>##             logFC   AveExpr           t   P.Value adj.P.Val         B
+## ALAS2 -0.02958282 -0.661185 -0.03202959 0.9747308 0.9900751 -5.670345</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.norm.table.DBAvControl[&quot;GATA1&quot;,]</code></pre>
+<pre><code>##           logFC    AveExpr        t    P.Value adj.P.Val         B
+## GATA1 0.5544215 -0.6197297 1.877433 0.07348117 0.4295649 -4.172982</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.norm.table.DBAvControl[&quot;HBB&quot;,]</code></pre>
+<pre><code>##         logFC   AveExpr        t   P.Value adj.P.Val         B
+## HBB 0.2711627 -3.961081 1.122357 0.2735427 0.6373178 -5.107011</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.norm.table.DBA_GATA1vControl[&quot;ALAS2&quot;,]</code></pre>
+<pre><code>##            logFC   AveExpr          t   P.Value adj.P.Val         B
+## ALAS2 -0.9953784 -0.661185 -0.7396815 0.4671397 0.9997934 -4.663227</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.norm.table.DBA_GATA1vControl[&quot;GATA1&quot;,]</code></pre>
+<pre><code>##           logFC    AveExpr       t  P.Value adj.P.Val         B
+## GATA1 0.5889701 -0.6197297 1.36887 0.184549 0.9997934 -4.514909</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.norm.table.DBA_GATA1vControl[&quot;HBB&quot;,]</code></pre>
+<pre><code>##          logFC   AveExpr         t   P.Value adj.P.Val         B
+## HBB -0.4186402 -3.961081 -1.189288 0.2467237 0.9997934 -4.564614</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.norm.table.DBA_GATA1vDBA[&quot;ALAS2&quot;,]</code></pre>
+<pre><code>##            logFC   AveExpr          t   P.Value adj.P.Val         B
+## ALAS2 -0.9657956 -0.661185 -0.7459769 0.4634028 0.9335219 -4.993166</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.norm.table.DBA_GATA1vDBA[&quot;GATA1&quot;,]</code></pre>
+<pre><code>##           logFC    AveExpr          t  P.Value adj.P.Val         B
+## GATA1 0.0345486 -0.6197297 0.08346093 0.934223 0.9924475 -5.190056</code></pre>
+<pre class="r"><code>combined.RMA.GSE89540.sn.norm.table.DBA_GATA1vDBA[&quot;HBB&quot;,]</code></pre>
+<pre><code>##         logFC   AveExpr         t   P.Value adj.P.Val         B
+## HBB -0.689803 -3.961081 -2.036829 0.0535984 0.8306519 -3.842394</code></pre>
 
 
 
