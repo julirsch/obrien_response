@@ -32,7 +32,7 @@ either RMA through the [affy package](https://www.bioconductor.org/packages/deve
 or the [SCAN package](https://www.bioconductor.org/packages/devel/bioc/vignettes/SCAN.UPC/inst/doc/SCAN.vignette.pdf).
 
 - RMA normalization [summary webpage](code/RMA_analysis.html) and corresponding [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/RMA_analysis.R)
-- SCAN normalization [summary webpage](code/RMA_analysis.html) and corresponding [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/RMA_analysis.R)
+- SCAN normalization [summary webpage](code/SCAN_analysis.html) and corresponding [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/SCAN_analysis.R)
 
 
 #### Differential Expression Analyses
@@ -51,7 +51,15 @@ As CIBERSORT was originally distributed through a [web interface](https://cibers
 we implemented their approach locally in this [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/CIBERSORT.r)
 for convenience and reproducibility. 
 
-#### 
+- RMA normalization [summary webpage](code/CIBERSORT_RMA_analysis.R) and corresponding [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/CIBERSORT_RMA_analysis.R)
+- SCAN normalization [summary webpage](code/CIBERSORT_SCAN_analysis.html) and corresponding [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/CIBERSORT_SCAN_analysis.R)
+
+
+#### Gene Set Analyses
+
+For each of the major gene sets discussed in this correspondence, we've created a separate analysis
+script to compare enrichments
+
 
 ## Processed Data
 
