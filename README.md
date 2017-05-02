@@ -20,7 +20,8 @@ of transcript profiles
 ## Analyses
 
 All analyses were performed in `R`, and all code to reproduce our findings is contained within
-the [code](code) subdirectory. While the raw `.R` scripts are contained and can be executed
+the [code](https://github.com/julirsch/dba_letter/tree/master/code) subdirectory. While the
+raw `.R` scripts are contained and can be executed
 after cloning or downloading this repository, we've rendered summary webpages of our analyses
 for ease of understanding the analyses performed. 
 
@@ -58,8 +59,10 @@ for convenience and reproducibility.
 #### Gene Set Analyses
 
 For each of the major gene sets discussed in this correspondence, we've created a separate analysis
-script to compare enrichments
+script to characterize and compare enrichments. 
 
+- Summary webpages for [GATA1](code/GS_GATA1_analysis.html), [heme](code/GS_Heme_analysis.html), [Ribosome](code/GS_RB_analysis.html), and [GSEA](code/GS_GSEA_analysis.html)
+- Corresponding `.R` scripts for [GATA1](https://github.com/julirsch/dba_letter/tree/master/code/GS_GATA1_analysis.R), [heme](https://github.com/julirsch/dba_letter/tree/master/code/GS_Heme_analysis.html), [Ribosome](https://github.com/julirsch/dba_letter/tree/master/code/GS_RB_analysis.html), and [GSEA](https://github.com/julirsch/dba_letter/tree/master/code/GS_GSEA_analysis.html)
 
 ## Processed Data
 
