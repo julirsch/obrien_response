@@ -13,10 +13,11 @@ we reprocessed the data produced in [O'Brien _et al._](http://www.bloodjournal.o
 which is contained under accession [GSE89540](https://github.com/julirsch/dba_letter/tree/master/data/GSE89540_RAW). To develop and evaluate samples
 of transcript profiles  
 
-- GSE22552 from [Merryweather-Clarke _et al._](https://www.ncbi.nlm.nih.gov/pubmed/21270440)
-- Study <-> GSE
+- [GSE22552](https://github.com/julirsch/dba_letter/tree/master/data/GSE22552_RAW) from [Merryweather-Clarke _et al._](https://www.ncbi.nlm.nih.gov/pubmed/21270440)
+- [GSE24759](https://github.com/julirsch/dba_letter/tree/master/data/GSE24759_RAW) from [Novershtern _et al._](https://www.ncbi.nlm.nih.gov/pubmed/21241896)
+- [GSE41817](https://github.com/julirsch/dba_letter/tree/master/data/GSE41817_RAW) from [Ludwig _et al._](https://www.ncbi.nlm.nih.gov/pubmed/24952648)
 
-## Code
+## Analyses
 
 All analyses were performed in `R`, and all code to reproduce our findings is contained within
 the [code](code) subdirectory. While the raw `.R` scripts are contained and can be executed
@@ -30,17 +31,17 @@ analyses using two different flavors of preprocessing. Each mode used primarily
 either RMA through the [affy package](https://www.bioconductor.org/packages/devel/bioc/manuals/affy/man/affy.pdf)
 or the [SCAN package](https://www.bioconductor.org/packages/devel/bioc/vignettes/SCAN.UPC/inst/doc/SCAN.vignette.pdf).
 
-- RMA normalization [summary webpage](https://github.com/julirsch/dba_letter/tree/master/code/RMA_analysis.html) and corresponding [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/RMA_analysis.R)
-- SCAN normalization [summary webpage](https://github.com/julirsch/dba_letter/tree/master/code/RMA_analysis.html) and corresponding [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/RMA_analysis.R)
+- RMA normalization [summary webpage](code/RMA_analysis.html) and corresponding [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/RMA_analysis.R)
+- SCAN normalization [summary webpage](code/RMA_analysis.html) and corresponding [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/RMA_analysis.R)
 
 
 #### Differential Expression Analyses
 
 Here, we used the [limma](http://bioconductor.org/packages/release/bioc/html/limma.html) package
-to uncover transcripts in both the RMA and SCAN processed samples to establish gene signatures for
+to uncover transcripts in each of the RMA and SCAN processed samples to establish gene signatures for
 reference cell type composition. 
 
-- Differential expression [summary webpage](https://github.com/julirsch/dba_letter/tree/master/code/DE_analysis.html) and [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/DE_analysis.R)
+- Differential expression [summary webpage](code/DE_analysis.html) and [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/DE_analysis.R)
 
 #### CIBERSORT
 
@@ -49,6 +50,8 @@ vector regression framework as previously implemented in [CIBERSORT](http://www.
 As CIBERSORT was originally distributed through a [web interface](https://cibersort.stanford.edu/),
 we implemented their approach locally in this [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/CIBERSORT.r)
 for convenience and reproducibility. 
+
+#### 
 
 ## Processed Data
 
