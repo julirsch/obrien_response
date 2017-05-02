@@ -49,7 +49,7 @@ To estimate the per-sample cell type composition, we classified each sample usin
 vector regression framework as previously implemented in [CIBERSORT](http://www.nature.com/nmeth/journal/v12/n5/abs/nmeth.3337.html).
 As CIBERSORT was originally distributed through a [web interface](https://cibersort.stanford.edu/),
 we implemented their approach locally in this [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/CIBERSORT.r)
-for convenience and reproducibility. 
+for convenience and reproducibility.
 
 - RMA normalization [summary webpage](code/CIBERSORT_RMA_analysis.R) and corresponding [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/CIBERSORT_RMA_analysis.R)
 - SCAN normalization [summary webpage](code/CIBERSORT_SCAN_analysis.html) and corresponding [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/CIBERSORT_SCAN_analysis.R)
@@ -58,7 +58,7 @@ for convenience and reproducibility.
 #### Gene Set Analyses
 
 For each of the major gene sets discussed in this correspondence, we've created a separate analysis
-script to characterize and compare enrichments. We investigated both typical [GSEA](http://www.pnas.org/content/102/43/15545.abstract) results using the [fgsea package](https://bioconductor.org/packages/release/bioc/html/fgsea.html) and looked at the distributions of gene sets more directly. Specific hypothesis tests reported in the paper are also shown.
+script to characterize and compare enrichments. We investigated both typical [GSEA](http://www.pnas.org/content/102/43/15545.abstract) results using the [fgsea package](https://bioconductor.org/packages/release/bioc/html/fgsea.html) and looked at the distributions of gene sets more directly. Specific hypothesis tests reported in the paper are also shown. We also create [synthetic normals](http://www.nature.com/ng/journal/v48/n10/full/ng.3646.html) in the [DE analysis code](code/DE_analysis.R) for each sample, which is the linear combination (%) of expression profiles of each control erythroid stage. We run GSEA on these synthetic normals directly and also use them to correct for cell type composition in the control and DBA samples from O'Brien et al.
 
 - Summary webpages for [GATA1 targets](code/GS_GATA1_analysis.html), [heme biosynthesis](code/GS_Heme_analysis.html), [ribosome biogenesis](code/GS_RB_analysis.html), and [multiple genesets using GSEA](code/GS_GSEA_analysis.html)
 - Corresponding `.R` scripts for [GATA1 targets](https://github.com/julirsch/dba_letter/tree/master/code/GS_GATA1_analysis.R), [heme biosynthesis](https://github.com/julirsch/dba_letter/tree/master/code/GS_Heme_analysis.html), [ribosome biogenesis](https://github.com/julirsch/dba_letter/tree/master/code/GS_RB_analysis.html), and [multiple genesets using GSEA](https://github.com/julirsch/dba_letter/tree/master/code/GS_GSEA_analysis.html)
