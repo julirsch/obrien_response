@@ -2,17 +2,18 @@
 
 This repository contains all data and analyses performed to assess
 potential confounding of the transcriptomic _ex vivo_ profiles
-examined in [O'Brien _et al_](http://www.bloodjournal.org/content/early/2017/04/03/blood-2017-01-760462?sso-checked=true)
+examined in [O'Brien _et al._](http://www.bloodjournal.org/content/early/2017/04/03/blood-2017-01-760462?sso-checked=true)
 due to variability in cell type composition. Below is a roadmap
 to our analysis framework as well as a synthesis of our results. 
 
 ## Raw Data
 
-All raw microarray samples (.CEL files) can be found in the [data](data) subdirectory. For our analyses, 
-we reprocessed the data produced in [O'Brien _et al_](http://www.bloodjournal.org/content/early/2017/04/03/blood-2017-01-760462?sso-checked=true),
-which is contained under accession [GSE89540](data/GSE89540_RAW). To develop synthetic 
+All raw microarray samples (.CEL files) can be found in the [data](https://github.com/julirsch/dba_letter/tree/master/data) subdirectory. For our analyses, 
+we reprocessed the data produced in [O'Brien _et al._](http://www.bloodjournal.org/content/early/2017/04/03/blood-2017-01-760462?sso-checked=true),
+which is contained under accession [GSE89540](https://github.com/julirsch/dba_letter/tree/master/data/GSE89540_RAW). To develop and evaluate samples
+of transcript profiles  
 
-- GSE22552 from [Merryweather-Clarke _et al_](https://www.ncbi.nlm.nih.gov/pubmed/21270440)
+- GSE22552 from [Merryweather-Clarke _et al._](https://www.ncbi.nlm.nih.gov/pubmed/21270440)
 - Study <-> GSE
 
 ## Code
@@ -26,27 +27,41 @@ for ease of understanding the analyses performed.
 
 To ensure the validity of our findings, we performed all normalization and down stream
 analyses using two different flavors of preprocessing. Each mode used primarily 
-either [RMA through the affy package](https://www.bioconductor.org/packages/devel/bioc/manuals/affy/man/affy.pdf)
-or [SCAN](https://www.bioconductor.org/packages/devel/bioc/vignettes/SCAN.UPC/inst/doc/SCAN.vignette.pdf).
+either RMA through the [affy package](https://www.bioconductor.org/packages/devel/bioc/manuals/affy/man/affy.pdf)
+or the [SCAN package](https://www.bioconductor.org/packages/devel/bioc/vignettes/SCAN.UPC/inst/doc/SCAN.vignette.pdf).
 
-- RMA normalization [summary webpage](code/RMA_analysis.html) and corresponding [Rscript](code/RMA_analysis.R)
-- SCAN normalization [summary webpage](code/RMA_analysis.html) and corresponding [Rscript](code/RMA_analysis.R)
+- RMA normalization [summary webpage](https://github.com/julirsch/dba_letter/tree/master/code/RMA_analysis.html) and corresponding [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/RMA_analysis.R)
+- SCAN normalization [summary webpage](https://github.com/julirsch/dba_letter/tree/master/code/RMA_analysis.html) and corresponding [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/RMA_analysis.R)
 
 
-#### 
+#### Differential Expression Analyses
+
+Here, we used the [limma](http://bioconductor.org/packages/release/bioc/html/limma.html) package
+to uncover transcripts in both the RMA and SCAN processed samples to establish gene signatures for
+reference cell type composition. 
+
+- Differential expression [summary webpage](https://github.com/julirsch/dba_letter/tree/master/code/DE_analysis.html) and [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/DE_analysis.R)
+
+#### CIBERSORT
+
+To estimate the per-sample cell type composition, we classified each sample using a support
+vector regression framework as previously implemented in [CIBERSORT](http://www.nature.com/nmeth/journal/v12/n5/abs/nmeth.3337.html).
+As CIBERSORT was originally distributed through a [web interface](https://cibersort.stanford.edu/),
+we implemented their approach locally in this [Rscript](https://github.com/julirsch/dba_letter/tree/master/code/CIBERSORT.r)
+for convenience and reproducibility. 
 
 ## Processed Data
 
 To speed up computational rendering at various stages and to ensure that our analyses were
 reproducible, we generated several binary `R` objects contained in `.rds` files that are housed
-in the [processed](processed) subdirectory. These objects can be immediately read into the 
+in the [processed](https://github.com/julirsch/dba_letter/tree/master/processed) subdirectory. These objects can be immediately read into the 
 `R` environment using the [readRDS](https://www.rdocumentation.org/packages/base/versions/3.4.0/topics/readRDS) function.
-Additionally, four `.txt` files are contained in the [processed](processed) subdirectory 
+Additionally, four `.txt` files are contained in the [processed](https://github.com/julirsch/dba_letter/tree/master/processed) subdirectory 
 that contain the gene signatures for GSE22552 and GSE24759 under both methods of normalization. 
 
 ## Overall
 
-In brief, these analyses suggest that the _ex vivo_ samples produced by O'Brien _et al_
+In brief, these analyses suggest that the _ex vivo_ samples produced by O'Brien _et al._
 did not have identical cell composition, which we show can confound the association
 reported in this study. Moreover, our results suggest that the effects uncovered in their
 analyses can be attributable to cell type composition. The following figure summarizes our
@@ -81,4 +96,4 @@ normalized enrichment scores (NES) are reported. All data presented in this figu
 RMA-normalized (see online analysis for SCAN-normalized). 
 
 ## Contact
-[Jacob C. Ulirsch](julirsch@broadinstitute.org)
+[Jacob C. Ulirsch](mailto:julirsch@broadinstitute.org)
